@@ -1,0 +1,38 @@
+body{
+    background-color: #212529f3;
+    color: #EEEEEE;
+}
+#brand{
+    /* color: orange; */
+    margin: 0 40px;
+}
+.nav-link{
+    width: 160px;
+    text-align: center;
+}
+.container {
+    margin: 4%;
+}
+.chartstyle {
+    width: 600px; 
+    height: 300px;
+    margin: 40px 0;
+}
+
+.dashboard {
+    display: flex;  /* Usa flexbox para organizar os elementos lado a lado */
+    justify-content: center; /* Centraliza os gráficos horizontalmente */
+    gap: 20px; /* Espaçamento entre os gráficos */
+}
+
+#gachart {
+    background-color: #EEEEEE;
+    padding: 0 20px;
+}
+
+.orange {
+    color: orange;
+}
+.blue {
+    color: blue;
+}
