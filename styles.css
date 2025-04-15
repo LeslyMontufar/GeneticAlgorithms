@@ -17,6 +17,7 @@ body{
     width: 600px; 
     height: 300px;
     margin: 40px 0;
+    background-color: aliceblue;
 }
 
 .dashboard {
@@ -35,4 +36,8 @@ body{
 }
 .blue {
     color: blue;
+}
+
+table{
+    border: black;
 }

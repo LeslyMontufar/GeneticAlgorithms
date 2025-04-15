@@ -58,7 +58,7 @@
                     <h1>{{page.pageTitle}}</h1>
                     <p>{{page.content}}</p>
                     <div class="dashboard">
-                        <div class="chartstyle" id="chart_div"></div>
+                        <div class="chartstyle"><table id="my-table" border="1" style="border-collapse: collapse;"></table></div>
                         <div class="chartstyle"><canvas id="gachart"></canvas></div>
                     </div>
                     <div id="best-individual"></div>
@@ -113,10 +113,10 @@
         app.mount('body');
 
     </script>
-
-    <script type="text/javascript" src="chart_fx.js"></script>            
+            
     <script type="text/javascript" src="ga_simple.js"></script>
     <script type="text/javascript" src="chart_progress.js"></script>  
+    <script type="text/javascript" src="resultstable.js"></script>
     
 </body>
 

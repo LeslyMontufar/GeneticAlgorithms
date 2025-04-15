@@ -1,6 +1,20 @@
 var {bestIndividualFitArr, meanPopFitArr, bestIndividual} = geneticAlgorithm(200,50);
 
-document.getElementById("best-individual").innerText = `Melhor Indivíduo: ${JSON.stringify(bestIndividual, null, 2)}`;
+function formatObjectWithVectorStrings(obj) {
+  let formatted = {};
+  for (let key in obj) {
+      if (Array.isArray(obj[key])) {
+          formatted[key] = obj[key].join(""); // transforma vetor em string
+      } else {
+          formatted[key] = obj[key]; // mantém valor original se não for vetor
+      }
+  }
+  return formatted;
+}
+
+const formatted = formatObjectWithVectorStrings(bestIndividual);
+
+document.getElementById("best-individual").innerText = `Melhor Indivíduo: ${JSON.stringify(formatted, null, 2)}`;
 
 
 function transparentize(rgb, alpha) {

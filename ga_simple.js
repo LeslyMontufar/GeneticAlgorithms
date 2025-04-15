@@ -1,21 +1,60 @@
-function fitness(x,y) {
-    return 10+x*Math.sin(4*x)+3*Math.sin(2*y);
+var motor = {
+    "1": 20,
+    "2": 15,
+    "3": 35,
+    "4": 40,
+    "5": 15,
+    "6": 15,
+    "7": 10
+};
+
+function fitness(x){
+    let r = [150-80, 150-90, 150-65, 150-70];
+    let potparada = [0, 0, 0, 0];
+    for(let i=0; i<7; i+=1){ // x[motor-1] = posicaoparada
+        potparada[x[i]-1] += motor[i+1];
+        if (i<2) {
+            potparada[x[i]] += motor[i+1];
+        }
+    }
+
+    r = r.map((val, i) => val - potparada[i]);
+    if (r.some(v => v < 0)) {
+        return 0;
+    } 
+    let total =  r.reduce((acumulador, v)=> acumulador+v, 0);
+    return Math.min(...r)+total;
 }
 
 function randomChromosome(bits=10) {
     return Array.from({ length: bits }, () => parseInt(Math.random() > 0.5 ? 1 : 0)); 
 }
 
-function decimal(chrom, max) {
-    return parseInt(chrom.join(''), 2) *max/((1<<chrom.length) - 1);
+function decimal(chrom, nx) {
+    let bin = chrom.join('');
+    let parts = [];
+    let size = bin.length/nx;
+    for (let i = 0; i < bin.length; i += size) {
+        parts.push(bin.slice(i, i + size));
+    }
+    return parts.map(part => parseInt(part, 2)+1);
 }
 
 function fillIndividual(chrom){
-    let x = decimal(chrom.slice(0,Math.floor(chrom.length/2)), 4);
-    let y = decimal(chrom.slice(Math.floor(chrom.length/2)), 2);
+    chrom = fixIndividual(chrom);
+    let x = decimal(chrom, 7);
+    let fit = fitness(x);
+    return {chrom, x, fit};
+}
 
-    let fit = fitness(x, y);
-    return {chrom, x, y, fit};
+function fixIndividual(chrom){
+    if (chrom.join('').slice(0, 2)=="11"){
+        chrom[1] = "0";
+    }
+    if (chrom.join('').slice(2, 4)=="11"){
+        chrom[3] = "0";
+    }
+    return chrom;
 }
 
 function randomIndividual(bits=10) {
@@ -72,14 +111,13 @@ function tournamentSelection(population, tournamentSize=3) {
 }
 
 function geneticAlgorithm(iterations = 100, populationSize = 50) {
-    let population = Array.from({ length: populationSize }, () => randomIndividual(10));
+    let population = Array.from({ length: populationSize }, () => randomIndividual(2*7));
     console.log(population)
     let pc = 0.1, pm = 0.01;
 
     let bestIndividual = 0;
     let meanGenerationFit = 0;
 
-    let bestIndividualArr = [];
     let bestIndividualFitArr = [];
     let meanPopFitArr = [];  
 
