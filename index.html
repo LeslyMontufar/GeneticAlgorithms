@@ -12,16 +12,25 @@
         <form id="formulario">
             <h2>Problema do Caixeiro Viajante</h2>
             <label>Épocas:</label>
-            <input type="number" name="epochs" value="100"/><br>
+            <input type="number" name="epochs" value="1000"/><br>
             <label>População:</label>
-            <input type="number" name="population" value="50"/><br>
+            <input type="number" name="population" value="500"/><br>
+            <label>Taxa de mutação:</label>
+            <input type="number" name="pm" value="0.6"/><br>
             <label>Taxa de crossover:</label>
             <input type="number" name="pc" value="0.8"/><br>
-            <button type="button" onclick="adicionarConstelacao()">Adicionar constelação: Alrescha (Alpha Piscium)</button>
-            <button type="button" onclick="resolverConstelacao()">Resolver</button>
+            <label>Quatidade de indivíduos no torneio:</label>
+            <input type="number" name="tournamentSize" value="3"/><br>
+            <label>Taxa de elitismo (%):</label>
+            <input type="number" name="pElitism" value="5"/><br>
+            <button type="button" onclick="adicionarConstelacao(0)">Adicionar constelação: Alrescha (Alpha Piscium)</button>
+            <button type="button" onclick="adicionarConstelacao(1)">Adicionar constelação: Orion </button>
+            <button type="button" onclick="resolverConstelacao(this)">Resolver</button>
             <button type="button" onclick="location.reload()">Limpar</button>
         </form>
     </div>
+
+    <div id="barra-progresso"></div>
 
     <script src="ga_caixeiro_viajante.js"></script>
     <script src="canvasJS.js"></script>

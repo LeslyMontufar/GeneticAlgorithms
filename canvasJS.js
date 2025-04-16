@@ -82,6 +82,6 @@
       ctx.shadowBlur = 0;
       ctx.fillStyle = "#fff";
       ctx.font = "16px Arial";
-      ctx.fillText(`Geração: ${generation}`, canvas.width - 200 - 20, 20);  // canto superior esquerdo
+      ctx.fillText(`Geração: ${generation}`, canvas.width - 200 - 20, 50);  // canto superior esquerdo
     }
   }
