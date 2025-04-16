@@ -12,9 +12,11 @@
         <form id="formulario">
             <h2>Problema do Caixeiro Viajante</h2>
             <label>Épocas:</label>
-            <input type="number" name="epochs" value="10"/><br>
+            <input type="number" name="epochs" value="100"/><br>
             <label>População:</label>
             <input type="number" name="population" value="50"/><br>
+            <label>Taxa de crossover:</label>
+            <input type="number" name="pc" value="0.8"/><br>
             <button type="button" onclick="adicionarConstelacao()">Adicionar constelação: Alrescha (Alpha Piscium)</button>
             <button type="button" onclick="resolverConstelacao()">Resolver</button>
             <button type="button" onclick="location.reload()">Limpar</button>
