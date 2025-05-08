@@ -18,6 +18,7 @@ function createBoard() {
       cell.dataset.col = col;
 
       cell.addEventListener('click', () => {
+        clearVisited();
         placeKnight(row, col);
       });
 
@@ -27,6 +28,7 @@ function createBoard() {
 }
 
 function placeKnight(row, col) {
+  console.log(row, col)
   // Remove cavalo anterior
   if (knightPosition) {
     const oldIndex = knightPosition.row * 8 + knightPosition.col;
@@ -42,7 +44,7 @@ function placeKnight(row, col) {
   knightPosition = { row, col };
 
   // Registra lance
-  const moveNotation = 'N'+getChessNotation(row, col);
+  const moveNotation = 'N' + getChessNotation(row, col);
   addMove(moveNotation);
 }
 
@@ -50,6 +52,19 @@ function placeKnight(row, col) {
 function getChessNotation(row, col) {
   const files = 'abcdefgh';
   return files[col] + (8 - row);
+}
+
+function getRowColumn(str) {
+  let row = str.charCodeAt(0) - 'a'.charCodeAt(0);
+  let col = parseInt(str[1]) - 1;
+  return { row, col };
+}
+
+function getRowColumnIndex(str) {
+  let row = str.charCodeAt(0) - 'a'.charCodeAt(0);
+  let col = parseInt(str[1]) - 1;
+  // return {row, col};
+  return row * 8 + col;
 }
 
 function addMove(notation) {
@@ -69,26 +84,31 @@ function animateKnightMoves(moves) {
       return;
     }
 
-    const squareId = moves[currentMoveIndex];
-    console.log(squareId)
-    const cell = document.getElementById(squareId);
+    let squareId = moves[currentMoveIndex];
+    let { row, col } = getRowColumn(squareId)
+    placeKnight(row, col)
 
-    // Remove o cavalo de todas as casas
-    document.querySelectorAll('.cell').forEach(cell => {
-      cell.classList.remove('knight');
-    });
+    const cell = board.children[getRowColumnIndex(squareId)];
 
     // Marca a casa como visitada
     cell.classList.add('visited');
-
-    // Adiciona o cavalo
-    cell.classList.add('knight');
 
     currentMoveIndex++;
     animationTimeouts.push(setTimeout(moveNext, 600)); // tempo entre os movimentos
   }
 
   moveNext();
+}
+
+function clearVisited(){
+  // Remove o visited de todas as casas
+  document.querySelectorAll('.cell').forEach(cell => {
+    cell.classList.remove('visited');
+  });
+}
+
+function toggleAnimationA() {
+  animateKnightMoves(knightMoves);
 }
 
 function toggleAnimation() {
@@ -103,13 +123,13 @@ function toggleAnimation() {
     icon.classList.add('fa-play');
   } else {
     // Iniciar animação
-    animationInProgress = true;
-    animateKnightMoves(knightMoves);
+    
+    clearVisited()
+
     icon.classList.remove('fa-play');
     icon.classList.add('fa-pause');
+    animateKnightMoves(knightMoves);
   }
 }
 
-
 createBoard();
-animateKnightMoves(knightMoves);

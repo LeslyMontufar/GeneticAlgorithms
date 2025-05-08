@@ -1,13 +1,5 @@
 function fitness(x) {
-    let dist = 0, dx, dy;
-    for (let i = 0; i < pontos.length - 1; i += 1) { // x[motor-1] = posicaoparada
-        dx = (pontos[x[i] - 1].x - pontos[x[i + 1] - 1].x);
-        dy = (pontos[x[i] - 1].y - pontos[x[i + 1] - 1].y);
-        dist += Math.sqrt(dx * dx + dy * dy);
-    }
-    dx = (pontos[x[pontos.length - 1] - 1].x - pontos[x[0] - 1].x);
-    dy = (pontos[x[pontos.length - 1] - 1].y - pontos[x[0] - 1].y);
-    dist += Math.sqrt(dx * dx + dy * dy);
+    
     return dist;
 }
 function randomChromosome(numCities) {    
@@ -24,7 +16,7 @@ function fillIndividual(x) {
     return { x, fit };
 }
 
-function randomIndividual(ids = 10) {
+function randomIndividual(ids) {
     let x = randomChromosome(ids);
     return fillIndividual(x);
 }
@@ -95,12 +87,16 @@ function generatePopulationDifferentIndividuals(popSize, numCities) {
     return population;
 }
 
-function generatePopulation(popSize, numCities) {
-    return Array.from({length: popSize}, () => randomIndividual(numCities));
+function generatePopulation(popSize, position) {
+    return Array.from({length: popSize}, () => randomIndividual(position));
+}
+
+function possibilidades(){
+    let indexArray = []
 }
 
 async function geneticAlgorithm(iterations = 100, populationSize = 50, pm=0.1, pc = 0.8, tournamentSize, pElitism) { // pontos é var global
-    let population = generatePopulation(populationSize, pontos.length);
+    let population = generatePopulation(populationSize, 6); // 3 bits 3 bits 
     console.log(JSON.stringify(population));
     let bestIndividual = null;
     let meanGenerationFit = 0;
@@ -130,11 +126,7 @@ async function geneticAlgorithm(iterations = 100, populationSize = 50, pm=0.1, p
         meanPopFitArr.push(meanGenerationFit);
 
         ordem = bestIndividual.x;
-        desenharTudo(i+1);
         atualizarBarraProgresso(i + 1, iterations);
-
-        await new Promise(resolve => setTimeout(resolve, 10)); // pequena pausa pra animar
-
     }
     return bestIndividual.x;
 }
