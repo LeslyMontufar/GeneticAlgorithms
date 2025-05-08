@@ -1,5 +1,7 @@
 const board = document.getElementById('board');
 const movesList = document.getElementById('moves-list');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const icon = playPauseBtn.querySelector('i'); 
 
 let knightPosition = null;
 let knightMoves = ['b1', 'c3', 'e4', 'f6']; // ou como quiser gerar
@@ -28,7 +30,7 @@ function createBoard() {
 }
 
 function placeKnight(row, col) {
-  console.log(row, col)
+  playPauseBtn.disabled = false;
   // Remove cavalo anterior
   if (knightPosition) {
     const oldIndex = knightPosition.row * 8 + knightPosition.col;
@@ -112,9 +114,6 @@ function toggleAnimationA() {
 }
 
 function toggleAnimation() {
-  const playPauseBtn = document.getElementById('playPauseBtn');
-  const icon = playPauseBtn.querySelector('i');
-
   if (animationInProgress) {
     // Pausar animação
     animationInProgress = false;
@@ -123,13 +122,19 @@ function toggleAnimation() {
     icon.classList.add('fa-play');
   } else {
     // Iniciar animação
-    
     clearVisited()
 
     icon.classList.remove('fa-play');
     icon.classList.add('fa-pause');
+    knightMoves = geneticAlgorithm();
     animateKnightMoves(knightMoves);
   }
+}
+
+function atualizarBarraProgresso(g, total) {
+  const barra = document.getElementById("barra-progresso");
+  const progresso = (g / total) * 100;
+  barra.style.width = progresso + "%";
 }
 
 createBoard();

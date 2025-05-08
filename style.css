@@ -128,3 +128,11 @@
     transition: width 0.2s ease;
     z-index: 1000;
   }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  button:disabled:hover {
+    background-color: initial; /* Remove o efeito hover */
+  }

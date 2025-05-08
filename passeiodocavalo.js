@@ -1,13 +1,38 @@
+
+
 function fitness(x) {
-    
-    return dist;
+    console.log(knightPosition)
+    let row, col, rowOld, colOld;
+    let counter = 0;
+
+    for (let i = 1; i < x.length; i++) {
+        row = parseInt(Math.floor(x[i] / 8));
+        col = x[i] % 8;
+        if (Math.abs(row - rowOld) == 1) {
+            if (Math.abs(col - colOld) != 2) break;
+        } else if (Math.abs(row - rowOld) == 2) {
+            if (Math.abs(col - colOld) != 1) break;
+        } else {
+            break;
+        }
+
+        rowOld = row;
+        colOld = col;
+        counter+=1;
+    }
+
+    return counter;
 }
-function randomChromosome(numCities) {    
+function randomChromosome(numCities) {
     const cities = Array.from({ length: numCities }, (_, i) => i + 1);
+    const initial = knightPosition.row * 8 + knightPosition.col;
+
     for (let i = cities.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [cities[i], cities[j]] = [cities[j], cities[i]];
+        [cities[i], cities[j]] = [cities[j], cities[i]]; // cities é vetor, trocando posicoes entre si
     }
+
+    [cities[0], cities[initial]] = [cities[initial], cities[0]];
     return cities;
 }
 
@@ -16,14 +41,14 @@ function fillIndividual(x) {
     return { x, fit };
 }
 
-function randomIndividual(ids) {
+function randomIndividual(ids = 10) {
     let x = randomChromosome(ids);
     return fillIndividual(x);
 }
 
 function mutate(cities, ids) {
-    let i = Math.floor(Math.random()*(ids-1));
-    let j = Math.floor(Math.random()*(ids-1));
+    let i = Math.floor(Math.random() * (ids - 1));
+    let j = Math.floor(Math.random() * (ids - 1));
     [cities.x[i], cities.x[j]] = [cities.x[j], cities.x[i]];
     return fillIndividual(cities.x);
 }
@@ -58,7 +83,7 @@ function sumFitness(individuos) {
 function tournamentSelection(population, tournamentSize = 3, pElitism) {
     let bestIndex = null;
     let bestFitness = +Infinity;
-    let elitismBestX = Math.floor(population.length*pElitism/100);
+    let elitismBestX = Math.floor(population.length * pElitism / 100);
 
     for (let i = 0; i < tournamentSize; i++) {
         let randomIndex = Math.floor(Math.random() * (population.length - 1 - elitismBestX) + elitismBestX); // evita pegar o primeiro individuo, pois ele foi o melhor da geracao passada
@@ -71,32 +96,12 @@ function tournamentSelection(population, tournamentSize = 3, pElitism) {
     return { individuo: population[bestIndex], posicao: bestIndex };
 }
 
-function generatePopulationDifferentIndividuals(popSize, numCities) {
-    const population = [];
-    const uniqueSet = new Set();
-
-    while (population.length < popSize) {
-        const chromo = randomChromosome(numCities);
-        const key = chromo.join(',');
-        if (!uniqueSet.has(key)) {
-            uniqueSet.add(key);
-            population.push(fillIndividual(chromo));
-        }
-    }
-
-    return population;
+function generatePopulation(popSize, numCities) {
+    return Array.from({ length: popSize }, () => randomIndividual(numCities));
 }
 
-function generatePopulation(popSize, position) {
-    return Array.from({length: popSize}, () => randomIndividual(position));
-}
-
-function possibilidades(){
-    let indexArray = []
-}
-
-async function geneticAlgorithm(iterations = 100, populationSize = 50, pm=0.1, pc = 0.8, tournamentSize, pElitism) { // pontos é var global
-    let population = generatePopulation(populationSize, 6); // 3 bits 3 bits 
+async function geneticAlgorithm(iterations = 100, populationSize = 5, pm = 0.1, pc = 0.8, tournamentSize = 3, pElitism = 5) { // pontos é var global
+    let population = generatePopulation(populationSize, 64);
     console.log(JSON.stringify(population));
     let bestIndividual = null;
     let meanGenerationFit = 0;
@@ -113,13 +118,13 @@ async function geneticAlgorithm(iterations = 100, populationSize = 50, pm=0.1, p
                 population[ip1] = childs[0];
                 population[ip2] = childs[1];
             }
-            if(Math.random() < pm){
-                let {individuo: parent, posicao: ip} = tournamentSelection(population, tournamentSize, pElitism);
+            if (Math.random() < pm) {
+                let { individuo: parent, posicao: ip } = tournamentSelection(population, tournamentSize, pElitism);
                 population[ip] = mutate(parent, pontos.length);
             }
         }
 
-        bestIndividual = population.sort((a, b) => a.fit - b.fit)[0]; // ordena do menor para o maior
+        bestIndividual = population.sort((a, b) => b.fit - a.fit)[0]; // ordena do maior para o menor
         meanGenerationFit = population.reduce((acumulador, individuo) => acumulador + individuo.fit, 0) / populationSize;
 
         bestIndividualFitArr.push(bestIndividual.fit);
@@ -127,6 +132,11 @@ async function geneticAlgorithm(iterations = 100, populationSize = 50, pm=0.1, p
 
         ordem = bestIndividual.x;
         atualizarBarraProgresso(i + 1, iterations);
+
     }
-    return bestIndividual.x;
+    console.log(bestIndividual.x)
+    return new Promise((resolve) => {
+        bestIndividual.x; // Aqui está errado
+    });
+    
 }
