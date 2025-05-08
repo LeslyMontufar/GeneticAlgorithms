@@ -34,6 +34,7 @@
     grid-template-columns: repeat(8, 1fr);
     width: min(90vmin, calc(var(--min-cell-size) * 8));
     aspect-ratio: 1 / 1;
+    cursor: pointer;
   }
   
   .cell {
@@ -90,6 +91,11 @@
 
   .cell.visited {
     background-color: #b4f0a7 !important; /* verde pastel */
+    transition: background-color 0.3s ease;
+  }
+
+  .cell.bad-visit {
+    background-color: #f0a7a7 !important; /* verde pastel */
     transition: background-color 0.3s ease;
   }
   

@@ -18,6 +18,7 @@ function createBoard() {
       cell.classList.add(isLight ? 'light' : 'dark');
       cell.dataset.row = row;
       cell.dataset.col = col;
+      cell.innerHTML = row * 8 + col;
 
       cell.addEventListener('click', () => {
         clearVisited();
@@ -63,15 +64,16 @@ function getRowColumn(str) {
 }
 
 function getRowColumnFromIndex(index) {
+  
   let row = parseInt(Math.floor(index / 8));
   let col = index % 8;
+  console.log("aqui", index, row, col)
   return { row, col };
 }
 
 function getRowColumnIndex(str) {
   let row = str.charCodeAt(0) - 'a'.charCodeAt(0);
   let col = parseInt(str[1]) - 1;
-  // return {row, col};
   return row * 8 + col;
 }
 
@@ -85,16 +87,38 @@ function clearMovesList(notation) {
   movesList.innerHTML = '';
 }
 
+function badvisit(currentMoveIndex, moves) {
+  if (currentMoveIndex == 0) {
+    return false;
+  }
+  let { rowOld, colOld } = getRowColumnFromIndex(moves[currentMoveIndex - 1])
+  let { row, col } = getRowColumnFromIndex(moves[currentMoveIndex])
+
+  console.log(row,col)
+  console.log(rowOld,colOld)
+  console.log(moves[currentMoveIndex-1])
+
+  if (Math.abs(row - rowOld) == 1) {
+    if (Math.abs(col - colOld) == 2){
+      return false;
+    }
+  } else if (Math.abs(row - rowOld) == 2) {
+    if (Math.abs(col - colOld) == 1){
+      return false;
+    }
+  } 
+  return true;
+}
+
 function animateKnightMoves(moves) {
-  console.log(JSON.stringify(knightMoves))
+  console.log("Animando: ",JSON.stringify(knightMoves))
   if (animationInProgress) return; // Não iniciar se já estiver em andamento
   animationInProgress = true;
   currentMoveIndex = 0;
 
   function moveNext() {
     if (currentMoveIndex >= moves.length) {
-      animationInProgress = false;
-      icon.classList.replace('fa-pause', 'fa-play');
+      stopAnimation();
       return;
     }
 
@@ -103,6 +127,13 @@ function animateKnightMoves(moves) {
     placeKnight(row, col)
 
     const cell = board.children[index];
+
+    if (badvisit(currentMoveIndex, moves)) {
+      cell.classList.add('bad-visit');
+      stopAnimation();
+      return;
+    }
+
 
     // Marca a casa como visitada
     cell.classList.add('visited');
@@ -145,13 +176,17 @@ async function runGeneticAndAnimate() {
   }
 }
 
+function stopAnimation() {
+  animationInProgress = false;
+  animationTimeouts.forEach(timeout => clearTimeout(timeout));
+  document.getElementById('playPauseBtn').querySelector('i')
+    .classList.replace('fa-pause', 'fa-play');
+}
+
 function toggleAnimation() {
   if (animationInProgress) {
     // Lógica para pausar
-    animationInProgress = false;
-    animationTimeouts.forEach(timeout => clearTimeout(timeout));
-    document.getElementById('playPauseBtn').querySelector('i')
-      .classList.replace('fa-pause', 'fa-play');
+    stopAnimation();
   } else {
     runGeneticAndAnimate();
   }
