@@ -4,10 +4,11 @@ const playPauseBtn = document.getElementById('playPauseBtn');
 const icon = playPauseBtn.querySelector('i');
 
 let knightPosition = null;
-let knightMoves = [0, 1, 2, 3, 63]; // ou como quiser gerar
+let knightMoves = [0, 17, 2, 44, 33]; // ou como quiser gerar
 let animationInProgress = false;
 let animationTimeouts = [];
 let currentMoveIndex = 0;
+let justChecking = false;
 
 function createBoard() {
   for (let row = 0; row < 8; row++) {
@@ -64,10 +65,8 @@ function getRowColumn(str) {
 }
 
 function getRowColumnFromIndex(index) {
-  
   let row = parseInt(Math.floor(index / 8));
   let col = index % 8;
-  console.log("aqui", index, row, col)
   return { row, col };
 }
 
@@ -91,33 +90,30 @@ function badvisit(currentMoveIndex, moves) {
   if (currentMoveIndex == 0) {
     return false;
   }
-  let { rowOld, colOld } = getRowColumnFromIndex(moves[currentMoveIndex - 1])
+  let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves[currentMoveIndex - 1])
   let { row, col } = getRowColumnFromIndex(moves[currentMoveIndex])
 
-  console.log(row,col)
-  console.log(rowOld,colOld)
-  console.log(moves[currentMoveIndex-1])
-
   if (Math.abs(row - rowOld) == 1) {
-    if (Math.abs(col - colOld) == 2){
+    if (Math.abs(col - colOld) == 2) {
       return false;
     }
   } else if (Math.abs(row - rowOld) == 2) {
-    if (Math.abs(col - colOld) == 1){
+    if (Math.abs(col - colOld) == 1) {
       return false;
     }
-  } 
+  }
   return true;
 }
 
 function animateKnightMoves(moves) {
-  console.log("Animando: ",JSON.stringify(knightMoves))
+  console.log("Animando: ", JSON.stringify(knightMoves))
   if (animationInProgress) return; // Não iniciar se já estiver em andamento
   animationInProgress = true;
   currentMoveIndex = 0;
 
   function moveNext() {
     if (currentMoveIndex >= moves.length) {
+      justChecking = false;
       stopAnimation();
       return;
     }
@@ -130,13 +126,17 @@ function animateKnightMoves(moves) {
 
     if (badvisit(currentMoveIndex, moves)) {
       cell.classList.add('bad-visit');
-      stopAnimation();
-      return;
+      justChecking = true;
+    } else if (justChecking){
+      cell.classList.add('just-checking');
+    }
+    else{
+      // Marca a casa como visitada
+      cell.classList.add('visited');
     }
 
 
-    // Marca a casa como visitada
-    cell.classList.add('visited');
+
 
     currentMoveIndex++;
     animationTimeouts.push(setTimeout(moveNext, 600)); // tempo entre os movimentos
@@ -149,7 +149,12 @@ function clearVisited() {
   // Remove o visited de todas as casas
   document.querySelectorAll('.cell').forEach(cell => {
     cell.classList.remove('visited');
+    cell.classList.remove('bad-visit');
   });
+}
+
+async function runGeneticAndAnimateA() {
+  animateKnightMoves(knightMoves);
 }
 
 async function runGeneticAndAnimate() {

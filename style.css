@@ -1,144 +1,197 @@
 :root {
-    --light-square: #f0d9b5;
-    --dark-square: #b58863;
-    --highlight: #f6f669;
-    --background: #f0f0f0;
-    --panel-background: #ffffff;
-    --text-color: #333;
-    --min-cell-size: 50px;
-  }
-  
-  body {
-    margin: 0;
-    font-family: "Segoe UI", sans-serif;
-    background-color: var(--background);
-    color: var(--text-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden; /* impede o body de crescer além da tela */
-  }
-
-  .container {
-    display: flex;
-    height: min(90vmin, calc(var(--min-cell-size) * 8)); /* limite de altura */
-    background-color: var(--panel-background);
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-  }
-  
-  .board {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    width: min(90vmin, calc(var(--min-cell-size) * 8));
-    aspect-ratio: 1 / 1;
-    cursor: pointer;
-  }
-  
-  .cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.2rem;
-  }
-  
-  .cell.light {
-    background-color: var(--light-square);
-  }
-  
-  .cell.dark {
-    background-color: var(--dark-square);
-  }
-  
-  .moves-panel {
-    width: 200px;
-    padding: 1rem;
-    background-color: var(--panel-background);
-    border-left: 1px solid #ccc;
-    overflow-y: auto;
-    height: 100%;  /* força a altura a obedecer o container pai */
-    scroll-behavior: smooth;
-  }
-  
-  .moves-panel h2 {
-    margin-top: 0;
-    font-size: 1.1rem;
-  }
-  
-  
-  #moves-list {
-    padding-left: 1.2rem;
-  }
-  
-  #moves-list li {
-    margin-bottom: 0.5rem;
-  }
-
-  .cell img {
-    max-width: 90%;
-    max-height: 90%;
-    pointer-events: none;
-  }
-
-  .knight {
-    background-image: url('bN.svg');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-  }
-
-  .cell.visited {
-    background-color: #b4f0a7 !important; /* verde pastel */
-    transition: background-color 0.3s ease;
-  }
-
-  .cell.bad-visit {
-    background-color: #f0a7a7 !important; /* verde pastel */
-    transition: background-color 0.3s ease;
-  }
-  
-  button {
-    position: relative; /* Distância do botão para os lances */
-    padding: 5px 10px;
-    background-color: transparent;
-    border: none;  /* Uma borda discreta */
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 10px; /* Tamanho reduzido para o ícone */
-    color: rgb(77, 77, 77);
-  }
-  
-  button i {
-    transition: transform 0.2s; /* Suaviza a transição do ícone */
-  }
-  
-  button:hover i {
-    transform: scale(1.2); /* Aumenta o ícone quando o usuário passar o mouse */
-  }
-
-  .controls {
-    padding: 5pt;
-    display: flex;
-    justify-content: right;
-    margin-right: 15%;
+  --light-square: #f0d9b5;
+  --dark-square: #b58863;
+  --highlight: #f6f669;
+  --background: #f0f0f0;
+  --panel-background: #ffffff;
+  --text-color: #333;
+  --min-cell-size: 50px;
 }
 
-#barra-progresso {
-    position: absolute;
-    top: 0;
-    height: 4px;
-    background-color: rgb(0, 255, 140);
-    width: 0%;
-    transition: width 0.2s ease;
-    z-index: 1000;
-  }
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-color: var(--background);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  /* impede o body de crescer além da tela */
+}
 
-  button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  button:disabled:hover {
-    background-color: initial; /* Remove o efeito hover */
-  }
+.container {
+  display: flex;
+  height: min(90vmin, calc(var(--min-cell-size) * 8));
+  /* limite de altura */
+  background-color: var(--panel-background);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: min(90vmin, calc(var(--min-cell-size) * 8));
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+}
+
+.cell.light {
+  background-color: var(--light-square);
+}
+
+.cell.dark {
+  background-color: var(--dark-square);
+}
+
+.moves-panel {
+  width: 150px;
+  padding: 1rem;
+  background-color: var(--panel-background);
+  border-left: 1px solid #ccc;
+  overflow-y: auto;
+  height: 100%;
+  /* força a altura a obedecer o container pai */
+  scroll-behavior: smooth;
+}
+
+.moves-panel h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+
+#moves-list {
+  padding-left: 1.2rem;
+}
+
+#moves-list li {
+  margin-bottom: 0.5rem;
+}
+
+.cell img {
+  max-width: 90%;
+  max-height: 90%;
+  pointer-events: none;
+}
+
+.knight {
+  background-image: url('bN.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.cell.visited {
+  background-color: #b4f0a7 !important;
+  /* verde pastel */
+  transition: background-color 0.3s ease;
+}
+
+.cell.bad-visit {
+  background-color: #f0a7a7 !important;
+  /* verde pastel */
+  transition: background-color 0.3s ease;
+}
+
+.cell.just-checking {
+  background-color: #a7c1f0 !important;
+  /* verde pastel */
+  transition: background-color 0.3s ease;
+}
+
+.moves-panel.controls {
+  /* padding: 5pt; */
+  display: flex;
+  /* justify-content: b; */
+  right: 50%;
+  bottom: 0%;
+}
+
+button {
+  position: relative;
+  /* Distância do botão para os lances */
+  padding: 5px 10px;
+  background-color: transparent;
+  border: none;
+  /* Uma borda discreta */
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 10px;
+  /* Tamanho reduzido para o ícone */
+  color: rgb(77, 77, 77);
+}
+
+button i {
+  transition: transform 0.2s;
+  /* Suaviza a transição do ícone */
+}
+
+button:hover i {
+  transform: scale(1.2);
+  /* Aumenta o ícone quando o usuário passar o mouse */
+}
+
+
+
+#barra-progresso {
+  position: absolute;
+  top: 0;
+  height: 4px;
+  background-color: rgb(0, 255, 140);
+  width: 0%;
+  transition: width 0.2s ease;
+  z-index: 1000;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:disabled:hover {
+  background-color: initial;
+  /* Remove o efeito hover */
+}
+
+.main-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  margin: 2rem auto;
+  max-width: 95vw;
+}
+
+.stats-panel {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  /* height: min(90vmin, calc(var(--min-cell-size) * 8)); */
+  overflow-y: auto;
+  width: 240px;
+}
+
+.stats-panel h2,
+.stats-panel h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.stats-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

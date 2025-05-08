@@ -11,26 +11,41 @@
 
 <body>
     <div id="barra-progresso"></div>
-    <div>
+    <div class="main-container">
         <div class="container">
             <div class="board" id="board"></div>
             <div class="moves-panel">
                 <h2>Lances</h2>
                 <ol id="moves-list"></ol>
+
+                <div class="controls">
+                    <button id="playPauseBtn" onclick="toggleAnimation()" disabled>
+                        <i class="fas fa-play"></i> <!-- ícone de play -->
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div class="controls">
-            <button id="playPauseBtn" onclick="toggleAnimation()" disabled>
-                <i class="fas fa-play"></i> <!-- ícone de play -->
-            </button>
+        <!-- Novo Painel de Estatísticas/Configurações -->
+        <div class="stats-panel">
+            <h2>Estatísticas</h2>
+            <div id="stats">
+                <p>Melhor fitness: <span id="best-fitness">-</span></p>
+                <p>Geração atual: <span id="current-gen">-</span></p>
+            </div>
+
+            <h3>Configurações</h3>
+            <form id="gen-form">
+                <label for="generations">Gerações:</label>
+                <input type="number" id="generations" name="generations" min="1" value="1000" />
+            </form>
         </div>
     </div>
 
-    
+
     <script src="script.js"></script>
     <script src="passeiodocavalo.js"></script>
-    
+
 </body>
 
 </html>
