@@ -1,77 +1,120 @@
-body {
-  margin: 0;
-  overflow: hidden;
-  background: radial-gradient(ellipse at center, #0d1b2a 0%, #000000 100%);
-  font-family: Arial, sans-serif;
-}
-
-#canvas {
-  display: block;
-}
-
-.label {
-  position: absolute;
-  color: #fff;
-  font-size: 14px;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-/* div */
-
-#sidebar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    width: 16vw; /* 1/6 da largura da tela */
-    background-color: rgba(255, 255, 255, 0.127); /* transparente */
-    backdrop-filter: blur(2px);
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-    padding: 20px;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-    color: #fff;
-}
-
-#formulario {
+:root {
+    --light-square: #f0d9b5;
+    --dark-square: #b58863;
+    --highlight: #f6f669;
+    --background: #f0f0f0;
+    --panel-background: #ffffff;
+    --text-color: #333;
+    --min-cell-size: 50px;
+  }
+  
+  body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background-color: var(--background);
+    color: var(--text-color);
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden; /* impede o body de crescer além da tela */
+  }
 
-#formulario input, #formulario button {
-    padding: 8px;
-    border-radius: 8px;
-    border: none;
-    font-size: 14px;
-}
+  .container {
+    display: flex;
+    height: min(90vmin, calc(var(--min-cell-size) * 8)); /* limite de altura */
+    background-color: var(--panel-background);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    width: min(90vmin, calc(var(--min-cell-size) * 8));
+    aspect-ratio: 1 / 1;
+  }
+  
+  .cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+  }
+  
+  .cell.light {
+    background-color: var(--light-square);
+  }
+  
+  .cell.dark {
+    background-color: var(--dark-square);
+  }
+  
+  .moves-panel {
+    width: 200px;
+    padding: 1rem;
+    background-color: var(--panel-background);
+    border-left: 1px solid #ccc;
+    overflow-y: auto;
+    height: 100%;  /* força a altura a obedecer o container pai */
+    scroll-behavior: smooth;
+  }
+  
+  .moves-panel h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+  }
+  
+  
+  #moves-list {
+    padding-left: 1.2rem;
+  }
+  
+  #moves-list li {
+    margin-bottom: 0.5rem;
+  }
 
-#formulario button {
-    background-color: #00bfff;
-    color: white;
+  .cell img {
+    max-width: 90%;
+    max-height: 90%;
+    pointer-events: none;
+  }
+
+  .knight {
+    background-image: url('bN.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .cell.visited {
+    background-color: #b4f0a7 !important; /* verde pastel */
+    transition: background-color 0.3s ease;
+  }
+  
+  button {
+    position: relative; /* Distância do botão para os lances */
+    padding: 5px 10px;
+    background-color: transparent;
+    border: none;  /* Uma borda discreta */
+    border-radius: 5px;
     cursor: pointer;
-}
-#formulario button:disabled{
-  background-color: #96999a;
-  cursor: not-allowed;
-  pointer-events: none;
-}
+    font-size: 10px; /* Tamanho reduzido para o ícone */
+    color: rgb(77, 77, 77);
+  }
+  
+  button i {
+    transition: transform 0.2s; /* Suaviza a transição do ícone */
+  }
+  
+  button:hover i {
+    transform: scale(1.2); /* Aumenta o ícone quando o usuário passar o mouse */
+  }
 
-#formulario button:hover {
-    background-color: #0099cc;
-}
-
-
-/* barra de progresso */
-
-#barra-progresso {
-  position: absolute;
-  top: 0;
-  /* left: 16vw; ajuste conforme a largura da sua sidebar */
-  height: 4px;
-  background-color: orange;
-  width: 0%;
-  transition: width 0.2s ease;
-  z-index: 1000;
+  .controls {
+    padding: 5pt;
+    display: flex;
+    justify-content: right;
+    margin-right: 15%;
 }

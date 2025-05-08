@@ -1,43 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Caixeiro Estrelado</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Passeio do Cavalo</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
-    <canvas id="canvas"></canvas>
+    <div>
+        <div class="container">
+            <div class="board" id="board"></div>
+            <div class="moves-panel">
+                <h2>Lances</h2>
+                <ol id="moves-list"></ol>
+            </div>
+        </div>
 
-    <div id="sidebar">
-        <form id="formulario">
-            <h2>Problema do Caixeiro Viajante</h2>
-            <label>Épocas:</label>
-            <input type="number" name="epochs" value="1000"/><br>
-            <label>População:</label>
-            <input type="number" name="population" value="500"/><br>
-            <label>Taxa de mutação:</label>
-            <input type="number" name="pm" value="0.6"/><br>
-            <label>Taxa de crossover:</label>
-            <input type="number" name="pc" value="0.8"/><br>
-            <label>Quatidade de indivíduos no torneio:</label>
-            <input type="number" name="tournamentSize" value="3"/><br>
-            <label>Taxa de elitismo (%):</label>
-            <input type="number" name="pElitism" value="5"/><br>
-            <button type="button" onclick="adicionarConstelacao(0)">Adicionar constelação: Alrescha (Alpha Piscium)</button>
-            <button type="button" onclick="adicionarConstelacao(1)">Adicionar constelação: Orion </button>
-            <button type="button" onclick="resolverConstelacao(this)">Resolver</button>
-            <button type="button" onclick="location.reload()">Limpar</button>
-        </form>
-        <br>
-        <p style="font-size: 14px; color: darkgray; text-align: center; width: 100%; padding-bottom: 20px;">Lesly Montúfar - Abril/2025</p>
-
+        <div class="controls">
+            <button id="playPauseBtn disable" onclick="toggleAnimation()">
+                <i class="fas fa-play"></i> <!-- ícone de play -->
+            </button>
+        </div>
     </div>
 
-    <div id="barra-progresso"></div>
-
-    <script src="ga_caixeiro_viajante.js"></script>
-    <script src="canvasJS.js"></script>
-    <script src="defines.js"></script>
-
+    <script src="script.js"></script>
 </body>
+
 </html>
