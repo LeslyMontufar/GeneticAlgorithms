@@ -1,10 +1,10 @@
 const board = document.getElementById('board');
 const movesList = document.getElementById('moves-list');
 const playPauseBtn = document.getElementById('playPauseBtn');
-const icon = playPauseBtn.querySelector('i'); 
+const icon = playPauseBtn.querySelector('i');
 
 let knightPosition = null;
-let knightMoves = ['b1', 'c3', 'e4', 'f6']; // ou como quiser gerar
+let knightMoves = [0, 1, 2, 3, 63]; // ou como quiser gerar
 let animationInProgress = false;
 let animationTimeouts = [];
 let currentMoveIndex = 0;
@@ -62,6 +62,12 @@ function getRowColumn(str) {
   return { row, col };
 }
 
+function getRowColumnFromIndex(index) {
+  let row = parseInt(Math.floor(index / 8));
+  let col = index % 8;
+  return { row, col };
+}
+
 function getRowColumnIndex(str) {
   let row = str.charCodeAt(0) - 'a'.charCodeAt(0);
   let col = parseInt(str[1]) - 1;
@@ -75,7 +81,12 @@ function addMove(notation) {
   movesList.appendChild(li);
 }
 
+function clearMovesList(notation) {
+  movesList.innerHTML = '';
+}
+
 function animateKnightMoves(moves) {
+  console.log(JSON.stringify(knightMoves))
   if (animationInProgress) return; // Não iniciar se já estiver em andamento
   animationInProgress = true;
   currentMoveIndex = 0;
@@ -83,14 +94,15 @@ function animateKnightMoves(moves) {
   function moveNext() {
     if (currentMoveIndex >= moves.length) {
       animationInProgress = false;
+      icon.classList.replace('fa-pause', 'fa-play');
       return;
     }
 
-    let squareId = moves[currentMoveIndex];
-    let { row, col } = getRowColumn(squareId)
+    let index = moves[currentMoveIndex];
+    let { row, col } = getRowColumnFromIndex(index)
     placeKnight(row, col)
 
-    const cell = board.children[getRowColumnIndex(squareId)];
+    const cell = board.children[index];
 
     // Marca a casa como visitada
     cell.classList.add('visited');
@@ -102,32 +114,46 @@ function animateKnightMoves(moves) {
   moveNext();
 }
 
-function clearVisited(){
+function clearVisited() {
   // Remove o visited de todas as casas
   document.querySelectorAll('.cell').forEach(cell => {
     cell.classList.remove('visited');
   });
 }
 
-function toggleAnimationA() {
-  animateKnightMoves(knightMoves);
+async function runGeneticAndAnimate() {
+  try {
+    playPauseBtn.disabled = true;
+
+    // Mostra estado de processamento
+    icon.classList.replace('fa-play', 'fa-spinner');
+    icon.classList.add('fa-spin');
+
+    // Aguarda o algoritmo genético terminar
+    knightMoves = await geneticAlgorithm();
+
+    // Prepara para animação
+    icon.classList.replace('fa-spinner', 'fa-pause');
+    icon.classList.remove('fa-spin');
+    playPauseBtn.disabled = false;
+    clearMovesList();
+
+    // Executa a animação
+    animateKnightMoves(knightMoves);
+  } catch (error) {
+    console.error("Erro:", error);
+  }
 }
 
 function toggleAnimation() {
   if (animationInProgress) {
-    // Pausar animação
+    // Lógica para pausar
     animationInProgress = false;
     animationTimeouts.forEach(timeout => clearTimeout(timeout));
-    icon.classList.remove('fa-pause');
-    icon.classList.add('fa-play');
+    document.getElementById('playPauseBtn').querySelector('i')
+      .classList.replace('fa-pause', 'fa-play');
   } else {
-    // Iniciar animação
-    clearVisited()
-
-    icon.classList.remove('fa-play');
-    icon.classList.add('fa-pause');
-    knightMoves = geneticAlgorithm();
-    animateKnightMoves(knightMoves);
+    runGeneticAndAnimate();
   }
 }
 

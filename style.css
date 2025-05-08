@@ -123,7 +123,7 @@
     position: absolute;
     top: 0;
     height: 4px;
-    background-color: greenyellow;
+    background-color: rgb(0, 255, 140);
     width: 0%;
     transition: width 0.2s ease;
     z-index: 1000;
