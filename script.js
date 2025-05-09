@@ -3,23 +3,28 @@ const movesList = document.getElementById('moves-list');
 const playPauseBtn = document.getElementById('playPauseBtn');
 const icon = playPauseBtn.querySelector('i');
 
+const iterations = document.querySelector('input[name="epochs"]').value;
+const populationSize = document.querySelector('input[name="population"]').value;
+
 let knightPosition = null;
-let knightMoves = [0, 17, 2, 44, 33]; // ou como quiser gerar
+let knightMoves = [0, 17, 2, 24]; // ou como quiser gerar
 let animationInProgress = false;
 let animationTimeouts = [];
 let currentMoveIndex = 0;
 let justChecking = false;
 
+const lado = 8;
+
 function createBoard() {
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 8; col++) {
+  for (let row = 0; row < lado; row++) {
+    for (let col = 0; col < lado; col++) {
       const cell = document.createElement('div');
       cell.classList.add('cell');
       const isLight = (row + col) % 2 === 0;
       cell.classList.add(isLight ? 'light' : 'dark');
       cell.dataset.row = row;
       cell.dataset.col = col;
-      cell.innerHTML = row * 8 + col;
+      cell.innerHTML = row * lado + col;
 
       cell.addEventListener('click', () => {
         clearVisited();
@@ -35,13 +40,13 @@ function placeKnight(row, col) {
   playPauseBtn.disabled = false;
   // Remove cavalo anterior
   if (knightPosition) {
-    const oldIndex = knightPosition.row * 8 + knightPosition.col;
+    const oldIndex = knightPosition.row * lado + knightPosition.col;
     const oldCell = board.children[oldIndex];
     oldCell.classList.remove('knight');
   }
 
   // Adiciona classe à nova célula
-  const index = row * 8 + col;
+  const index = row * lado + col;
   const cell = board.children[index];
   cell.classList.add('knight');
 
@@ -55,7 +60,7 @@ function placeKnight(row, col) {
 
 function getChessNotation(row, col) {
   const files = 'abcdefgh';
-  return files[col] + (8 - row);
+  return files[col] + (lado - row);
 }
 
 function getRowColumn(str) {
@@ -65,21 +70,22 @@ function getRowColumn(str) {
 }
 
 function getRowColumnFromIndex(index) {
-  let row = parseInt(Math.floor(index / 8));
-  let col = index % 8;
+  let row = parseInt(Math.floor(index / lado));
+  let col = index % lado;
   return { row, col };
 }
 
 function getRowColumnIndex(str) {
   let row = str.charCodeAt(0) - 'a'.charCodeAt(0);
   let col = parseInt(str[1]) - 1;
-  return row * 8 + col;
+  return row * lado + col;
 }
 
 function addMove(notation) {
   const li = document.createElement('li');
   li.textContent = notation;
   movesList.appendChild(li);
+  movesList.scrollTop = movesList.scrollHeight;
 }
 
 function clearMovesList(notation) {
@@ -127,16 +133,13 @@ function animateKnightMoves(moves) {
     if (badvisit(currentMoveIndex, moves)) {
       cell.classList.add('bad-visit');
       justChecking = true;
-    } else if (justChecking){
+    } else if (justChecking) {
       cell.classList.add('just-checking');
     }
-    else{
+    else {
       // Marca a casa como visitada
       cell.classList.add('visited');
     }
-
-
-
 
     currentMoveIndex++;
     animationTimeouts.push(setTimeout(moveNext, 600)); // tempo entre os movimentos
@@ -166,6 +169,7 @@ async function runGeneticAndAnimate() {
     icon.classList.add('fa-spin');
 
     // Aguarda o algoritmo genético terminar
+    // knightMoves = await geneticAlgorithm(iterations = iterations, populationSize = populationSize, pm = 0.8, pc = 0.8, tournamentSize = 3, pElitism = 5);
     knightMoves = await geneticAlgorithm();
 
     // Prepara para animação

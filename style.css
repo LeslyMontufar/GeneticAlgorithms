@@ -55,6 +55,7 @@ body {
 }
 
 .moves-panel {
+  position: relative;
   width: 150px;
   padding: 1rem;
   background-color: var(--panel-background);
@@ -65,6 +66,16 @@ body {
   scroll-behavior: smooth;
 }
 
+.controls {
+  position: absolute;
+  text-align: center;
+  bottom: 0;
+  padding-bottom: 38px;
+  left: 0;
+  width: 100%;
+  background-color: white;
+}
+
 .moves-panel h2 {
   margin-top: 0;
   font-size: 1.1rem;
@@ -73,6 +84,8 @@ body {
 
 #moves-list {
   padding-left: 1.2rem;
+  max-height: calc(100% - 80px); /* altura disponível dentro da moves-panel */
+  overflow-y: auto;
 }
 
 #moves-list li {
@@ -110,16 +123,10 @@ body {
   transition: background-color 0.3s ease;
 }
 
-.moves-panel.controls {
-  /* padding: 5pt; */
-  display: flex;
-  /* justify-content: b; */
-  right: 50%;
-  bottom: 0%;
-}
+
 
 button {
-  position: relative;
+  /* position: relative; */
   /* Distância do botão para os lances */
   padding: 5px 10px;
   background-color: transparent;
@@ -128,7 +135,6 @@ button {
   border-radius: 5px;
   cursor: pointer;
   font-size: 10px;
-  /* Tamanho reduzido para o ícone */
   color: rgb(77, 77, 77);
 }
 
@@ -182,6 +188,7 @@ button:disabled:hover {
   /* height: min(90vmin, calc(var(--min-cell-size) * 8)); */
   overflow-y: auto;
   width: 240px;
+  height: inherit;
 }
 
 .stats-panel h2,
