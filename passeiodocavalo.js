@@ -18,26 +18,29 @@ function fitness(x) {
     return counter;
 }
 
-function possibilidades(i, opcao, moves) {
-    let index = moves[i];
-    let row = parseInt(Math.floor(index / lado));
-    let col = index % lado;
-    //opcao row 1 ou 2; col igual ou diferente
-    let bin = opcao.toString(2).padStart(3, '0');
-    let num = parseInt(bin[0]) + 1; // 0 ou 1 -> 1 ou 2 // 1%2 = 1  2%2 =0
-    let sinalRow = parseInt(bin[1]) * 2 - 1;
-    let sinalCol = parseInt(bin[2]) * 2 - 1;
-    let newIndex = (row + sinalRow * num) * lado + col + sinalCol * (num % 2 + 1);
-
-    if (newIndex < 0 || newIndex > 63 || moves.slice(0, i).includes(newIndex) || (col + sinalCol * (num % 2 + 1) > 7)) {
-        return -1;
-    }
-
-    return newIndex;
+function isValidNext(moves_anteriores, candidateMove) {
+    console.log("Moves anteriores: ", moves_anteriores)
+    let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves_anteriores[moves_anteriores.length-1]);
+    let { row, col } = getRowColumnFromIndex(candidateMove);
+    return !(index < 0 || index > 63 || moves_anteriores.includes(candidateMove) || Math.abs((row - rowOld) * (col - colOld)) == 2);
 }
 
-function Warnsdorff(){
-    return;
+function maxNumWarnsdorff(currentMoveIndex, moves) { //Warnsdorff
+    let nValidMoves = []; 
+    let posicaoTeste;
+
+    for (let i = 0; i < offsets.length; i++) {
+        posicaoTeste = moves[currentMoveIndex] + offsets[i];
+        moves_anteriores = moves.slice(0, currentMoveIndex);
+        if (isValidNext(moves_anteriores, posicaoTeste)) {
+            for (let j = 0; i < offsets.length; i++) {
+                if (isValidNext([moves_anteriores, posicaoTeste], candidateMove = posicaoTeste + offsets[j])) {
+                    nValidMoves[i] += 1;
+                }
+            }
+        }
+    }
+    return nValidMoves;
 }
 
 
@@ -53,20 +56,9 @@ function fixIndividual(v) {
 function randomChromosome(numCasas = 64) {
     let moves = Array.from({ length: numCasas }, (_, i) => i);
     let j = -1;
-    // let option, count;
 
     for (let i = 1; i < moves.length; i++) {
-        // console.log("inicio")
-        // j == -1
-        // option = Math.floor(Math.random() * 7);
-        // do {
-        //     j = possibilidades(i, option, moves);
-        //     option += 1
-        // } while (j == -1)
-        // console.log(j)
-        // console.log("fim")
-
-        j  = Math.floor(Math.random() * (numCasas-2) + 1);
+        j = Math.floor(Math.random() * (numCasas - 2) + 1);
         [moves[i], moves[j]] = [moves[j], moves[i]]; // cities é vetor, trocando posicoes entre si
     }
 
@@ -84,9 +76,9 @@ function randomIndividual(ids) {
     return fillIndividual(x);
 }
 
-function mutate(cities, ids) {
-    let i = Math.floor(Math.random() * (ids - 1));
-    let j = Math.floor(Math.random() * (ids - 1));
+function mutate(cities, qtd) {
+    let i = Math.floor(Math.random() * (qtd - 2) + 1); // evita pegar o primeiro elemento
+    let j = Math.floor(Math.random() * (qtd - 2) + 1);
     [cities.x[i], cities.x[j]] = [cities.x[j], cities.x[i]];
 
     cities.x = fixIndividual(cities.x);
@@ -135,22 +127,22 @@ function tournamentSelection(population, tournamentSize = 3, pElitism) {
     return { individuo: population[bestIndex], posicao: bestIndex };
 }
 
-function sumFitness(individuos){
+function sumFitness(individuos) {
     return individuos.reduce((acumulador, individuo) => acumulador + individuo.fit, 0);
 }
 
-function selectRoulette(populacao, pElitism){
+function selectRoulette(populacao, pElitism) {
     let S = sumFitness(populacao);  // Calcula o total de fitness
     let sorteio = Math.random() * S; // Gera um número aleatório entre 0 e somaTotalFitness
 
-    let acumulador = 0;
+    let acumulador = 0; // (nro de mov validos) |63| (+) |2*63|
 
     for (let i = 0; i < populacao.length; i++) {
         acumulador += populacao[i].fit;
 
         if (acumulador >= sorteio) {
-            if(i<pElitism){
-                return { individuo: populacao[i+1], posicao: i+1 };
+            if (i < pElitism) {
+                return { individuo: populacao[i + 1], posicao: i + 1 };
             }
             return { individuo: populacao[i], posicao: i };  // Retorna o indivíduo e a posição
         }
@@ -163,7 +155,9 @@ function generatePopulation(popSize, numCities) {
 
 async function geneticAlgorithm(iterations = 1500, populationSize = 300, pm = 0.1, pc = 0.8, tournamentSize = 3, pElitism = 1) {
     return new Promise((resolve) => {
-        let nroCasas = lado*lado;
+        console.log(iterations, populationSize, pm, pc, tournamentSize, pElitism)
+
+        let nroCasas = lado * lado;
         let population = generatePopulation(populationSize, nroCasas);
         // console.log(JSON.stringify(population));
         let bestIndividual = population.sort((a, b) => b.fit - a.fit)[0];
@@ -197,14 +191,14 @@ async function geneticAlgorithm(iterations = 1500, populationSize = 300, pm = 0.
             }
 
             bestIndividual = population.sort((a, b) => b.fit - a.fit)[0];
-            meanGenerationFit = population.reduce((acumulador, individuo) => acumulador + individuo.fit, 0) / populationSize;
+            // meanGenerationFit = population.reduce((acumulador, individuo) => acumulador + individuo.fit, 0) / populationSize;
 
-            bestIndividualFitArr.push(bestIndividual.fit);
-            meanPopFitArr.push(meanGenerationFit);
+            // bestIndividualFitArr.push(bestIndividual.fit);
+            // meanPopFitArr.push(meanGenerationFit);
 
             knightMoves = bestIndividual.x;
 
-            atualizarBarraProgresso(i + 1, iterations);
+            atualizarBarraProgresso(i + 1, iterations, bestIndividual);
 
             // Processa a próxima iteração de forma assíncrona
             setTimeout(() => runIteration(i + 1), 0);

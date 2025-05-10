@@ -2,9 +2,21 @@ const board = document.getElementById('board');
 const movesList = document.getElementById('moves-list');
 const playPauseBtn = document.getElementById('playPauseBtn');
 const icon = playPauseBtn.querySelector('i');
+const bestFitnessID = document.getElementById('best-fitness');
+const currentGenID = document.getElementById('current-gen');
 
-const iterations = document.querySelector('input[name="epochs"]').value;
-const populationSize = document.querySelector('input[name="population"]').value;
+let epochs = document.querySelector('input[name="epochs"]').value;
+let population = document.querySelector('input[name="population"]').value;
+let lado = document.querySelector('input[name="tabuleiro"]').value;
+
+document.getElementById('tabuleiro').addEventListener('input', (e) => {
+  const novoLado = parseInt(e.target.value);
+  if (!isNaN(novoLado) && novoLado > 0) {
+    lado = novoLado; // <-- atualiza a variável global
+    createBoard(lado); // <-- função que desenha o tabuleiro
+  }
+});
+
 
 let knightPosition = null;
 let knightMoves = [0, 17, 2, 24]; // ou como quiser gerar
@@ -13,9 +25,11 @@ let animationTimeouts = [];
 let currentMoveIndex = 0;
 let justChecking = false;
 
-const lado = 8;
+function createBoard(lado) {
+  board.innerHTML = '';
+  // board.style.gridTemplateColumns = `repeat(${lado}, 1fr)`;
+  document.documentElement.style.setProperty('--lado', lado);
 
-function createBoard() {
   for (let row = 0; row < lado; row++) {
     for (let col = 0; col < lado; col++) {
       const cell = document.createElement('div');
@@ -34,6 +48,7 @@ function createBoard() {
       board.appendChild(cell);
     }
   }
+
 }
 
 function placeKnight(row, col) {
@@ -59,7 +74,7 @@ function placeKnight(row, col) {
 
 
 function getChessNotation(row, col) {
-  const files = 'abcdefgh';
+  const files = 'abcdefghijkl';
   return files[col] + (lado - row);
 }
 
@@ -88,7 +103,7 @@ function addMove(notation) {
   movesList.scrollTop = movesList.scrollHeight;
 }
 
-function clearMovesList(notation) {
+function clearMovesList() {
   movesList.innerHTML = '';
 }
 
@@ -99,14 +114,17 @@ function badvisit(currentMoveIndex, moves) {
   let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves[currentMoveIndex - 1])
   let { row, col } = getRowColumnFromIndex(moves[currentMoveIndex])
 
-  if (Math.abs(row - rowOld) == 1) {
-    if (Math.abs(col - colOld) == 2) {
-      return false;
-    }
-  } else if (Math.abs(row - rowOld) == 2) {
-    if (Math.abs(col - colOld) == 1) {
-      return false;
-    }
+  // if (Math.abs(row - rowOld) == 1) {
+  //   if (Math.abs(col - colOld) == 2) {
+  //     return false;
+  //   }
+  // } else if (Math.abs(row - rowOld) == 2) {
+  //   if (Math.abs(col - colOld) == 1) {
+  //     return false;
+  //   }
+  // }
+  if(Math.abs((row - rowOld)*(col - colOld)) == 2) {
+    return false;
   }
   return true;
 }
@@ -153,6 +171,7 @@ function clearVisited() {
   document.querySelectorAll('.cell').forEach(cell => {
     cell.classList.remove('visited');
     cell.classList.remove('bad-visit');
+    cell.classList.remove('just-checking');
   });
 }
 
@@ -169,14 +188,15 @@ async function runGeneticAndAnimate() {
     icon.classList.add('fa-spin');
 
     // Aguarda o algoritmo genético terminar
-    // knightMoves = await geneticAlgorithm(iterations = iterations, populationSize = populationSize, pm = 0.8, pc = 0.8, tournamentSize = 3, pElitism = 5);
-    knightMoves = await geneticAlgorithm();
+    knightMoves = await geneticAlgorithm(iterations = epochs, population = population, pm = 0.8, pc = 0.8, tournamentSize = 3, pElitism = 5);
+    // knightMoves = await geneticAlgorithm();
 
     // Prepara para animação
     icon.classList.replace('fa-spinner', 'fa-pause');
     icon.classList.remove('fa-spin');
     playPauseBtn.disabled = false;
     clearMovesList();
+    clearVisited();
 
     // Executa a animação
     animateKnightMoves(knightMoves);
@@ -190,6 +210,9 @@ function stopAnimation() {
   animationTimeouts.forEach(timeout => clearTimeout(timeout));
   document.getElementById('playPauseBtn').querySelector('i')
     .classList.replace('fa-pause', 'fa-play');
+  epochsID.disabled = false;
+  populationID.disabled = false;
+  tabuleiro.disabled = false;
 }
 
 function toggleAnimation() {
@@ -197,14 +220,22 @@ function toggleAnimation() {
     // Lógica para pausar
     stopAnimation();
   } else {
+    epochsID.disabled = true;
+    populationID.disabled = true;
+    tabuleiro.disabled = true;
+
     runGeneticAndAnimate();
   }
 }
 
-function atualizarBarraProgresso(g, total) {
+function atualizarBarraProgresso(g, total, bestIndividual) {
   const barra = document.getElementById("barra-progresso");
   const progresso = (g / total) * 100;
   barra.style.width = progresso + "%";
+
+  bestFitnessID.innerHTML = bestIndividual.fit;
+  currentGenID.innerHTML = g;
+
 }
 
-createBoard();
+createBoard(lado);
