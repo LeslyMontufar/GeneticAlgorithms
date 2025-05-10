@@ -5,7 +5,7 @@
   --background: #f0f0f0;
   --panel-background: #ffffff;
   --text-color: #333;
-  --min-cell-size: 50px;
+  --min-cell-size: 80px;
   --lado: 5;
 }
 
@@ -24,7 +24,7 @@ body {
 
 .container {
   display: flex;
-  height: min(90vmin, calc(var(--min-cell-size) * 8));
+  height: min(90vmin, calc(var(--min-cell-size) * var(--lado)));
   /* limite de altura */
   background-color: var(--panel-background);
   border-radius: 10px;
@@ -35,9 +35,10 @@ body {
 .board {
   display: grid;
   grid-template-columns: repeat(var(--lado), 1fr);
-  width: min(90vmin, calc(var(--min-cell-size) * 8));
+  /* width: min(90vmin, calc(var(--min-cell-size) * var(--lado))); */
   aspect-ratio: 1 / 1;
   cursor: pointer;
+  overflow: visible;
 }
 
 .cell {
@@ -62,7 +63,7 @@ body {
   background-color: var(--panel-background);
   border-left: 1px solid #ccc;
   /* overflow-y: auto; */
-  height: 100%;
+  height: initial;
   /* força a altura a obedecer o container pai */
   /* scroll-behavior: smooth; */
 }
@@ -71,7 +72,8 @@ body {
   position: absolute;
   text-align: center;
   bottom: 0;
-  padding-bottom: 38px;
+  /* padding-bottom: 38px; */
+  padding-bottom: 5px;
   left: 0;
   width: 100%;
   background-color: white;
@@ -85,7 +87,7 @@ body {
 
 #moves-list {
   padding-left: 1.2rem;
-  max-height: calc(100% - 80px); /* altura disponível dentro da moves-panel */
+  max-height: calc(100% - 5%); /* altura disponível dentro da moves-panel */
   overflow-y: auto;
   scroll-behavior: smooth;
 }
@@ -188,7 +190,7 @@ button:disabled:hover {
   padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  height: cal(var(--lado)*1fr) ;
+  height: cal(var(--lado)*var(--min-cell-size)) ;
   overflow-y: auto;
   width: 240px;
   height: inherit;
