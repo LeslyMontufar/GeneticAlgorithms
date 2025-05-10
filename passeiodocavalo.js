@@ -1,43 +1,35 @@
-const offsets = [
-    [-2, -1], [-2, 1],
-    [-1, -2], [-1, 2],
-    [1, -2], [1, 2],
-    [2, -1], [2, 1],
+let offsets = [
+    -2*lado -1, -2*lado+1,
+    -1*lado -2, -1*lado+2,
+    1*lado -2, 1*lado+2,
+    2*lado -1, 2*lado+1,
 ];
 
 function fitness(x) {
-    let counter = 0;
+    let score = 1;
 
     for (let i = 1; i < x.length; i++) {
         if (badvisit(i, x)) {
-            return counter;
+            return score; //
         }
-        counter += 1;
+        score += 1 + (8 - numValidMoves(i, x))*100;
     }
 
-    return counter;
+    return score;
 }
 
-function isValidNext(moves_anteriores, candidateMove) {
-    console.log("Moves anteriores: ", moves_anteriores)
-    let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves_anteriores[moves_anteriores.length-1]);
+function isValid(moves_anteriores, candidateMove) {
+    let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves_anteriores[moves_anteriores.length - 1]);
     let { row, col } = getRowColumnFromIndex(candidateMove);
-    return !(index < 0 || index > 63 || moves_anteriores.includes(candidateMove) || Math.abs((row - rowOld) * (col - colOld)) == 2);
+    return !(candidateMove < 0 || candidateMove > 63 || moves_anteriores.includes(candidateMove) || Math.abs((row - rowOld) * (col - colOld)) == 2);
 }
 
-function maxNumWarnsdorff(currentMoveIndex, moves) { //Warnsdorff
-    let nValidMoves = []; 
-    let posicaoTeste;
-
-    for (let i = 0; i < offsets.length; i++) {
-        posicaoTeste = moves[currentMoveIndex] + offsets[i];
-        moves_anteriores = moves.slice(0, currentMoveIndex);
-        if (isValidNext(moves_anteriores, posicaoTeste)) {
-            for (let j = 0; i < offsets.length; i++) {
-                if (isValidNext([moves_anteriores, posicaoTeste], candidateMove = posicaoTeste + offsets[j])) {
-                    nValidMoves[i] += 1;
-                }
-            }
+function numValidMoves(i, moves) { //Warnsdorff
+    let nValidMoves = 0;
+    let currentposition = moves[i];
+    for (let j = 0; i < offsets.length; i++) {
+        if (isValid(moves_anteriores = moves.slice(0, i), candidateMove = currentposition + offsets[j])) {
+            nValidMoves += 1;
         }
     }
     return nValidMoves;
@@ -131,7 +123,7 @@ function sumFitness(individuos) {
     return individuos.reduce((acumulador, individuo) => acumulador + individuo.fit, 0);
 }
 
-function selectRoulette(populacao, pElitism) {
+function selectRoulette(populacao, nonen, pElitism) {
     let S = sumFitness(populacao);  // Calcula o total de fitness
     let sorteio = Math.random() * S; // Gera um número aleatório entre 0 e somaTotalFitness
 
@@ -168,7 +160,7 @@ async function geneticAlgorithm(iterations = 1500, populationSize = 300, pm = 0.
 
         // Usamos setImmediate ou setTimeout para não bloquear a thread principal
         function runIteration(i) {
-            if (i >= iterations || bestIndividual.fit >= nroCasas) {
+            if (i >= iterations || bestIndividual.fit%100 >= nroCasas) {
                 console.log("Best: ", JSON.stringify(bestIndividual));
                 resolve(bestIndividual.x); // Resolve a Promise com o resultado final
                 return;
@@ -176,14 +168,14 @@ async function geneticAlgorithm(iterations = 1500, populationSize = 300, pm = 0.
 
             for (let j = 0; j < Math.floor(populationSize / 2); j++) {
                 if (Math.random() < pc) {
-                    let { individuo: parent1, posicao: ip1 } = selectRoulette(population, pElitism);
-                    let { individuo: parent2, posicao: ip2 } = selectRoulette(population, pElitism);
+                    let { individuo: parent1, posicao: ip1 } = selectRoulette(population, tournamentSize, pElitism);
+                    let { individuo: parent2, posicao: ip2 } = selectRoulette(population, tournamentSize, pElitism);
                     let childs = cycleCrossover(parent1, parent2, nroCasas);
                     population[ip1] = childs[0];
                     population[ip2] = childs[1];
                 }
                 if (Math.random() < pm) {
-                    let { individuo: parent, posicao: ip } = tournamentSelection(population, tournamentSize, pElitism);
+                    let { individuo: parent, posicao: ip } = selectRoulette(population, tournamentSize, pElitism);
                     population[ip] = mutate(parent, nroCasas);
                 }
 

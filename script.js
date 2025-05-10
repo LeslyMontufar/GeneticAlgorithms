@@ -114,15 +114,6 @@ function badvisit(currentMoveIndex, moves) {
   let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves[currentMoveIndex - 1])
   let { row, col } = getRowColumnFromIndex(moves[currentMoveIndex])
 
-  // if (Math.abs(row - rowOld) == 1) {
-  //   if (Math.abs(col - colOld) == 2) {
-  //     return false;
-  //   }
-  // } else if (Math.abs(row - rowOld) == 2) {
-  //   if (Math.abs(col - colOld) == 1) {
-  //     return false;
-  //   }
-  // }
   if(Math.abs((row - rowOld)*(col - colOld)) == 2) {
     return false;
   }
@@ -172,11 +163,8 @@ function clearVisited() {
     cell.classList.remove('visited');
     cell.classList.remove('bad-visit');
     cell.classList.remove('just-checking');
+    justChecking = false
   });
-}
-
-async function runGeneticAndAnimateA() {
-  animateKnightMoves(knightMoves);
 }
 
 async function runGeneticAndAnimate() {
@@ -233,8 +221,9 @@ function atualizarBarraProgresso(g, total, bestIndividual) {
   const progresso = (g / total) * 100;
   barra.style.width = progresso + "%";
 
-  bestFitnessID.innerHTML = bestIndividual.fit;
+  bestFitnessID.innerHTML = bestIndividual.fit%100;
   currentGenID.innerHTML = g;
+  
 
 }
 
