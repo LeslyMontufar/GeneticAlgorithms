@@ -1,34 +1,39 @@
 let offsets = [
     -2*lado -1, -2*lado+1,
-    -1*lado -2, -1*lado+2,
-    1*lado -2, 1*lado+2,
-    2*lado -1, 2*lado+1,
+    -1*lado +2, 1*lado+2,
+    2*lado +1, 2*lado-1,
+    1*lado -2, -1*lado-2,
 ];
 
 function fitness(x) {
     let score = 1;
+    let nn;
 
     for (let i = 1; i < x.length; i++) {
         if (badvisit(i, x)) {
             return score; //
         }
-        score += 1 + (8 - numValidMoves(i, x))*100;
+        nn = numValidMoves(i, x);
+        score += 1 + (8 - nn)*100;
     }
 
     return score;
 }
 
+teste = [0, 11, 18]
+
 function isValid(moves_anteriores, candidateMove) {
     let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves_anteriores[moves_anteriores.length - 1]);
     let { row, col } = getRowColumnFromIndex(candidateMove);
-    return !(candidateMove < 0 || candidateMove > 63 || moves_anteriores.includes(candidateMove) || Math.abs((row - rowOld) * (col - colOld)) == 2);
+    return !(candidateMove < 0 || candidateMove >= lado*lado || moves_anteriores.includes(candidateMove) || Math.abs((row - rowOld) * (col - colOld)) != 2);
 }
 
 function numValidMoves(i, moves) { //Warnsdorff
     let nValidMoves = 0;
     let currentposition = moves[i];
-    for (let j = 0; i < offsets.length; i++) {
-        if (isValid(moves_anteriores = moves.slice(0, i), candidateMove = currentposition + offsets[j])) {
+    for (let j = 0; j < offsets.length; j++) {
+        
+        if (isValid(moves_anteriores = moves.slice(0, i+1), candidateMove = currentposition + offsets[j])) {
             nValidMoves += 1;
         }
     }
@@ -145,7 +150,7 @@ function generatePopulation(popSize, numCities) {
     return Array.from({ length: popSize }, () => randomIndividual(numCities));
 }
 
-async function geneticAlgorithm(iterations = 1500, populationSize = 300, pm = 0.1, pc = 0.8, tournamentSize = 3, pElitism = 1) {
+async function geneticAlgorithm(iterations = 1500, populationSize = 300, pm = 0.1, pc = 0.8, tournamentSize = 3, pElitism = 5) {
     return new Promise((resolve) => {
         console.log(iterations, populationSize, pm, pc, tournamentSize, pElitism)
 
@@ -188,8 +193,9 @@ async function geneticAlgorithm(iterations = 1500, populationSize = 300, pm = 0.
             // bestIndividualFitArr.push(bestIndividual.fit);
             // meanPopFitArr.push(meanGenerationFit);
 
-            knightMoves = bestIndividual.x;
+            // knightMoves = bestIndividual.x;
 
+            console.log(bestIndividual.x, bestIndividual.fit)
             atualizarBarraProgresso(i + 1, iterations, bestIndividual);
 
             // Processa a próxima iteração de forma assíncrona

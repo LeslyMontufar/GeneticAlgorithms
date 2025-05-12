@@ -5,8 +5,6 @@ const icon = playPauseBtn.querySelector('i');
 const bestFitnessID = document.getElementById('best-fitness');
 const currentGenID = document.getElementById('current-gen');
 
-let epochs = document.querySelector('input[name="epochs"]').value;
-let population = document.querySelector('input[name="population"]').value;
 let lado = document.querySelector('input[name="tabuleiro"]').value;
 
 document.getElementById('tabuleiro').addEventListener('input', (e) => {
@@ -114,7 +112,7 @@ function badvisit(currentMoveIndex, moves) {
   let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves[currentMoveIndex - 1])
   let { row, col } = getRowColumnFromIndex(moves[currentMoveIndex])
 
-  if(Math.abs((row - rowOld)*(col - colOld)) == 2) {
+  if (Math.abs((row - rowOld) * (col - colOld)) == 2) {
     return false;
   }
   return true;
@@ -167,6 +165,10 @@ function clearVisited() {
   });
 }
 
+// function runGeneticAndAnimate(){
+//   numValidMoves(2, teste)
+// }
+
 async function runGeneticAndAnimate() {
   try {
     playPauseBtn.disabled = true;
@@ -176,7 +178,13 @@ async function runGeneticAndAnimate() {
     icon.classList.add('fa-spin');
 
     // Aguarda o algoritmo genético terminar
-    knightMoves = await geneticAlgorithm(iterations = epochs, population = population, pm = 0.8, pc = 0.8, tournamentSize = 3, pElitism = 5);
+    let epochs = document.querySelector('input[name="epochs"]').value;
+    let population = document.querySelector('input[name="population"]').value;
+    let pm = document.querySelector('input[name="pm"]').value;
+    let pc = document.querySelector('input[name="pc"]').value;
+    let pElitism = document.querySelector('input[name="pElitism"]').value;
+    console.log(epochs, population)
+    knightMoves = await geneticAlgorithm(iterations = epochs, population = population, pm = pm, pc = pc, tournamentSize = 3, pElitism = pElitism);
     // knightMoves = await geneticAlgorithm();
 
     // Prepara para animação
@@ -221,9 +229,9 @@ function atualizarBarraProgresso(g, total, bestIndividual) {
   const progresso = (g / total) * 100;
   barra.style.width = progresso + "%";
 
-  bestFitnessID.innerHTML = bestIndividual.fit%100;
+  bestFitnessID.innerHTML = bestIndividual.fit % 100;
   currentGenID.innerHTML = g;
-  
+
 
 }
 
