@@ -41,7 +41,7 @@ def fitness_function_no_rotation(elementos):
 		phase = elementos[i][2]
 		matrizes[i] = pecas[i]['matrix']
 		if phase != 0 and not pecas[i]['direction']:
-			matrizes[i] = rotate(mat,phase, reshape=True)
+			matrizes[i] = rotate(matrizes[i],phase, reshape=True)
 		MAXIMO_LARGURA_ALTURA_PECA = max(MAXIMO_LARGURA_ALTURA_PECA,matrizes[i].shape[0],matrizes[i].shape[1])
 		
 	tecido = np.zeros((TECIDO_ALTURA+MAXIMO_LARGURA_ALTURA_PECA,TECIDO_LARGURA+MAXIMO_LARGURA_ALTURA_PECA), dtype=np.int8)
