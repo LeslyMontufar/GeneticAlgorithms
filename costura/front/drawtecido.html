@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Visualizador de Matrizes</title>
+	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			background: #f9f9f9;
+			font-family: sans-serif;
+			height: 100vh;
+			margin: 0;
+			padding: 20px;
+		}
+		section {
+			margin-bottom: 20px;
+			width: 100%;
+			max-width: 800px;
+		}
+		.container {
+			display: flex;
+			gap: 30px;
+			align-items: flex-start;
+		}
+		canvas {
+			border: 1px solid #ccc;
+		}
+		.controls {
+			margin-top: 10px;
+		}
+		button {
+			margin: 0 5px;
+			padding: 5px 10px;
+		}
+		#params {
+			min-width: 200px;
+			background: #fff;
+			border: 1px solid #ccc;
+			padding: 10px;
+			font-size: 14px;
+		}
+		label {
+			display: block;
+			margin: 10px 0 5px;
+		}
+		input[type="number"] {
+			width: 100%;
+		}
+	</style>
+</head>
+<body>
+
+	<h1>Visualizador de Matrizes</h1>
+
+	<!-- Seção de configuração -->
+	<section id="configSection">
+		<h2>Configuração</h2>
+		<label>Taxa de Mutação (0 a 1):</label>
+		<input type="number" id="mutacao" step="0.01" min="0" max="1" value="0.1">
+		<label>Taxa de Crossover (0 a 1):</label>
+		<input type="number" id="crossover" step="0.01" min="0" max="1" value="0.7">
+		<label>Número de Gerações (≥1):</label>
+		<input type="number" id="geracoes" min="1" value="50">
+		<label>Tamanho da População (≥10):</label>
+		<input type="number" id="populacao" min="10" value="30">
+		<button onclick="startTreinamento()">Start</button>
+	</section>
+
+	<!-- Seção de visualização -->
+	<section id="vizSection" style="display: none;">
+		<div class="container">
+			<canvas id="matrixCanvas"></canvas>
+			<div id="params"></div>
+		</div>
+
+		<div class="controls">
+			<button onclick="prevMatrix()">⬅️ Anterior</button>
+			<button onclick="nextMatrix()">Próximo ➡️</button>
+			<button onclick="novoTreinamento()">Novo Treinamento</button>
+		</div>
+
+		<h3>Gráfico Geração x Fitness</h3>
+		<canvas id="fitnessChartCanvas" width="600" height="200"></canvas>
+	</section>
+
+	<script>
+		const canvas = document.getElementById('matrixCanvas');
+		const ctx = canvas.getContext('2d');
+		const paramDiv = document.getElementById('params');
+		const chartCanvas = document.getElementById('fitnessChartCanvas');
+		const chartCtx = chartCanvas.getContext('2d');
+
+		const pixelSize = 20;
+		let currentIndex = 0;
+		let estados = [];
+
+		function drawMatrix(state) {
+			const matrix = state.matriz;
+			const rows = matrix.length;
+			const cols = matrix[0].length;
+			canvas.width = cols * pixelSize;
+			canvas.height = rows * pixelSize;
+
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			for (let y = 0; y < rows; y++) {
+				for (let x = 0; x < cols; x++) {
+					ctx.fillStyle = matrix[y][x] ? 'black' : 'white';
+					ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+				}
+			}
+			showParams(state);
+		}
+
+		function showParams(obj) {
+			paramDiv.innerHTML = '';
+			for (const key in obj) {
+				if (key !== 'matriz') {
+					paramDiv.innerHTML += `<strong>${key}</strong>: ${obj[key]}<br>`;
+				}
+			}
+		}
+
+		function prevMatrix() {
+			if (currentIndex > 0) {
+				currentIndex--;
+				drawMatrix(estados[currentIndex]);
+			}
+		}
+
+		function nextMatrix() {
+			if (currentIndex < estados.length - 1) {
+				currentIndex++;
+				drawMatrix(estados[currentIndex]);
+			}
+		}
+
+		function startTreinamento() {
+			const params = {
+				mutacao: parseFloat(document.getElementById('mutacao').value),
+				crossover: parseFloat(document.getElementById('crossover').value),
+				geracoes: parseInt(document.getElementById('geracoes').value),
+				populacao: parseInt(document.getElementById('populacao').value)
+			};
+			estados = [];
+			currentIndex = 0;
+			document.getElementById('configSection').style.display = 'none';
+			document.getElementById('vizSection').style.display = 'block';
+			clearChart();
+
+			geneticAlgorithm(params, updateState); // função externa
+		}
+
+		function novoTreinamento() {
+			document.getElementById('configSection').style.display = 'block';
+			document.getElementById('vizSection').style.display = 'none';
+		}
+
+		function updateState(obj) {
+			estados.push(obj);
+			currentIndex = estados.length - 1;
+			drawMatrix(obj);
+			updateChart(obj.geracao, obj.fitnes);
+		}
+
+		// Gráfico simples no canvas
+		let chartData = [];
+		function updateChart(geracao, fitnes) {
+			chartData.push({ x: geracao, y: fitnes });
+			chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+			chartCtx.beginPath();
+			for (let i = 0; i < chartData.length; i++) {
+				const x = (chartData[i].x / Math.max(...chartData.map(p => p.x))) * chartCanvas.width;
+				const y = chartCanvas.height - (chartData[i].y / Math.max(...chartData.map(p => p.y))) * chartCanvas.height;
+				if (i === 0) chartCtx.moveTo(x, y);
+				else chartCtx.lineTo(x, y);
+			}
+			chartCtx.strokeStyle = 'blue';
+			chartCtx.stroke();
+		}
+
+		function clearChart() {
+			chartData = [];
+			chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+		}
+	</script>
+
+	<script src="websocket.js"></script>
+</body>
+</html>
