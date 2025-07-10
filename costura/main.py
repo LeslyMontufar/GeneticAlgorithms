@@ -1,4 +1,5 @@
 import random
+from peca import pecas
 from math import floor
 from config import *
 from fitness_function import fitness_function_no_rotation as fitness_function
@@ -50,6 +51,7 @@ def geneticAlgorithm(population, generations, crossover_rate, mutation_rate):
                 
         population.sort(key=lambda ind: ind.fitness, reverse=True)  # Sort population by fitness
         best_individual = population[0]
+        print(f"Generation {generation+1}: Best individual: {best_individual.genes}  Best fitness = {best_individual.fitness}") 
     return best_individual
 
 def calculate(mutation_rate, crossover_rate, generations, population_size, element_count):
@@ -66,7 +68,7 @@ def calculate(mutation_rate, crossover_rate, generations, population_size, eleme
         Individual: The best individual found in the population.
     """
     # Initialize a random population
-    initial_population = [Individual([[random.int(0,TECIDO_ALTURA-1), random.randint(0,TECIDO_LARGURA-1), random.randint(0,360-1)] for _ in range(element_count)]) for _ in range(population_size)]
+    initial_population = [Individual([[random.randint(0,TECIDO_ALTURA-1), random.randint(0,TECIDO_LARGURA-1), random.randint(0,360-1)] for _ in range(element_count)]) for _ in range(population_size)]
     print(initial_population)
     
     # Run the genetic algorithm
@@ -80,7 +82,7 @@ if __name__ == "__main__":
     crossover_rate = 0.7
     generations = 1
     population_size = 5
-    element_count = 5
+    element_count = len(pecas)
     
     best_individual = calculate(mutation_rate, crossover_rate, generations, population_size, element_count)
     print("Best individual:", best_individual.genes, "Fitness:", best_individual.fitness)
