@@ -1,6 +1,4 @@
 import random
-import Math
-import config
 from fitness_function import *
 
 class Individual:
@@ -58,7 +56,7 @@ def calculate(mutation_rate, crossover_rate, generations, population_size, eleme
         Individual: The best individual found in the population.
     """
     # Initialize a random population
-    initial_population = [Individual([[Math.floor(random.random()*TECIDO_ALTURA), Math.floor(random.random()*TECIDO_LARGURA)] for _ in range(element_count)]) for _ in range(population_size)]
+    initial_population = [Individual([random.random() for _ in range(element_count)]) for _ in range(population_size)]
     
     # Run the genetic algorithm
     best_individual = geneticAlgorithm(initial_population, fitness_function, generations, crossover_rate, mutation_rate)
