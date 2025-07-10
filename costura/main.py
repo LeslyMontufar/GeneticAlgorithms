@@ -20,7 +20,8 @@ def select_parents(population, num_parents, elitism_num=3):
     selected_parents = []
     for _ in range(num_parents):  # Select two parents
         # gera um torneio de 3 individuos (indices)
-        tournament_index = random.sample(range(elitism_num,len(population)), tournament_size)
+        indices =[i for i in range(elitism_num, len(population))]
+        tournament_index = random.sample(indices, tournament_size)
         tournament_index.sort(key=lambda i: population[i].fitness, reverse=True)
         best_individual = population.pop(tournament_index[0])  # Select the best individual from the tournament
         selected_parents.append(best_individual)
@@ -29,11 +30,15 @@ def select_parents(population, num_parents, elitism_num=3):
 def crossover(parents):
     beta = random.random()
     parent1, parent2 = parents
-    child1_genes = [beta*parent1.genes[i] + (1-beta)*parent2.genes[i] for i in range(len(parent1.genes))]
-    child2_genes = [(1-beta)*parent1.genes[i] + beta*parent2.genes[i] for i in range(len(parent1.genes))]
+    # print(f"Parent1: {parent1.genes}, Parent2: {parent2.genes}, Beta: {beta}, {beta}{parent1.genes[0]}")
+    
+    child1_genes = [[beta*x+(1-beta)*y for x,y in zip(g1,g2)] for g1,g2 in zip(parent1.genes, parent2.genes)]
+    child2_genes = [[(1-beta)*x+beta*y for x,y in zip(g1,g2)] for g1,g2 in zip(parent1.genes, parent2.genes)]
     return Individual(child1_genes), Individual(child2_genes)
 
-def geneticAlgorithm(population, generations, crossover_rate, mutation_rate):
+def geneticAlgorithm(population, generations, crossover_rate, mutation_rate, udpate=None):
+    if not udpate:
+        udpate = print
     for generation in range(generations):
         for _ in range(len(population)//2):
             if random.random() < crossover_rate:
@@ -51,10 +56,16 @@ def geneticAlgorithm(population, generations, crossover_rate, mutation_rate):
                 
         population.sort(key=lambda ind: ind.fitness, reverse=True)  # Sort population by fitness
         best_individual = population[0]
-        print(f"Generation {generation+1}: Best individual: {best_individual.genes}  Best fitness = {best_individual.fitness}") 
+        m = best_individual.tecido.astype(int).tolist()
+        udpate(dict(
+            generation=generation+1, 
+            matriz=m, 
+            fitness= float(best_individual.fitness)
+            ))
+        # print(f"Generation {generation+1}: Best individual: {best_individual.genes}  Best fitness = {best_individual.fitness}") 
     return best_individual
 
-def calculate(mutation_rate, crossover_rate, generations, population_size, element_count):
+def calculate(mutation_rate, crossover_rate, generations, population_size, element_count, update=None):
     """
     Calculate the best individual based on the genetic algorithm parameters.
     
@@ -69,19 +80,26 @@ def calculate(mutation_rate, crossover_rate, generations, population_size, eleme
     """
     # Initialize a random population
     initial_population = [Individual([[random.randint(0,TECIDO_ALTURA-1), random.randint(0,TECIDO_LARGURA-1), random.randint(0,360-1)] for _ in range(element_count)]) for _ in range(population_size)]
-    print(initial_population)
+    # print(initial_population)
     
     # Run the genetic algorithm
-    best_individual = geneticAlgorithm(initial_population, generations, crossover_rate, mutation_rate)
+    best_individual = geneticAlgorithm(initial_population, generations, crossover_rate, mutation_rate, update)
     
     return best_individual
 
+def main(data,  update, close):
+	mutation_rate = data['mutacao']
+	crossover_rate = data['crossover']
+	generations = data['geracoes']
+	population_size = data['populacao']
+	element_count = len(pecas)
+	best_individual = calculate(mutation_rate, crossover_rate, generations, population_size, element_count, update)
 if __name__ == "__main__":
     # Example usage
     mutation_rate = 0.01
     crossover_rate = 0.7
-    generations = 1
-    population_size = 5
+    generations = 100
+    population_size = 50
     element_count = len(pecas)
     
     best_individual = calculate(mutation_rate, crossover_rate, generations, population_size, element_count)

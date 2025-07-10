@@ -1,4 +1,4 @@
-async function geneticAlgorithm(obg, fnc_update_progress) {
+async function geneticAlgorithm(obj, fnc_update_progress) {
 	const token = "lesly" + Math.random().toString(36).substring(2);
 	const ws = new WebSocket(`ws://${location.host}/ws?token=${token}`)
 	let global_resolve = null;
@@ -14,7 +14,7 @@ async function geneticAlgorithm(obg, fnc_update_progress) {
 			return;
 		}
 		// precisa atualizar o front
-		fnc_update_progress(data.g, data.total, data.bestIndividual);
+		fnc_update_progress(data);
 	};
 
 	ws.onerror = (err) => {

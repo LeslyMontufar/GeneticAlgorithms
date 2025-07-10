@@ -1,51 +1,247 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Site de Costura</title>
-    <link rel="stylesheet" href="styles.css">
+	<meta charset="UTF-8">
+	<title>Visualizador de Matrizes</title>
+	<style>
+		:root {
+			--bg: #f4f6f8;
+			--primary: #1f2937;
+			--accent: #3b82f6;
+			--border: #d1d5db;
+			--card-bg: #ffffff;
+		}
+
+		body {
+			margin: 0;
+			padding: 20px;
+			font-family: 'Segoe UI', sans-serif;
+			background: var(--bg);
+			color: var(--primary);
+		}
+
+		h1,
+		h2,
+		h3 {
+			text-align: center;
+			color: var(--primary);
+			margin-bottom: 10px;
+		}
+
+		section {
+			background: var(--card-bg);
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			padding: 20px;
+			margin: 0 auto 20px;
+			max-width: 800px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+
+		label {
+			display: block;
+			margin-top: 10px;
+			font-weight: 500;
+		}
+
+		input[type="number"] {
+			width: 100%;
+			padding: 8px;
+			margin-top: 4px;
+			border: 1px solid var(--border);
+			border-radius: 4px;
+			box-sizing: border-box;
+		}
+
+		button {
+			margin-top: 20px;
+			background: var(--accent);
+			color: white;
+			border: none;
+			padding: 10px 20px;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 15px;
+		}
+
+		button:hover {
+			background: #2563eb;
+		}
+
+		.container {
+			display: flex;
+			gap: 20px;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: flex-start;
+		}
+
+		canvas {
+			border: 1px solid var(--border);
+			background: white;
+			border-radius: 4px;
+		}
+
+		#params {
+			background: #f9fafb;
+			border: 1px solid var(--border);
+			border-radius: 4px;
+			padding: 10px;
+			min-width: 200px;
+			font-size: 14px;
+		}
+
+		.controls {
+			text-align: center;
+			margin-top: 20px;
+		}
+
+		.controls button {
+			margin: 0 10px;
+		}
+	</style>
 </head>
 
 <body>
-    <form id="tetris-form">
-        <label for="name">Nome:</label>
-        <input type="text" id="name" name="name" required>
-        <div class="pieces">
-            <!-- Para cada peça de Tetris: I, O, T, S, Z, J, L -->
-            <div class="piece" data-piece="I">
-                <span class="piece-label">Peça I</span>
-                <div class="squares"></div>
-            </div>
-            <div class="piece" data-piece="O">
-                <span class="piece-label">Peça O</span>
-                <div class="squares"></div>
-            </div>
-            <div class="piece" data-piece="T">
-                <span class="piece-label">Peça T</span>
-                <div class="squares"></div>
-            </div>
-            <div class="piece" data-piece="S">
-                <span class="piece-label">Peça S</span>
-                <div class="squares"></div>
-            </div>
-            <div class="piece" data-piece="Z">
-                <span class="piece-label">Peça Z</span>
-                <div class="squares"></div>
-            </div>
-            <div class="piece" data-piece="J">
-                <span class="piece-label">Peça J</span>
-                <div class="squares"></div>
-            </div>
-            <div class="piece" data-piece="L">
-                <span class="piece-label">Peça L</span>
-                <div class="squares"></div>
-            </div>
-        </div>
-        <button type="submit">Enviar</button>
-    </form>
-    <script src="script.js"></script>
+
+	<h1>Visualizador de Matrizes</h1>
+
+	<section id="configSection">
+		<h2>Configuração</h2>
+		<label>Taxa de Mutação (0 a 1):</label>
+		<input type="number" id="mutacao" step="0.01" min="0" max="1" value="0.1">
+		<label>Taxa de Crossover (0 a 1):</label>
+		<input type="number" id="crossover" step="0.01" min="0" max="1" value="0.7">
+		<label>Número de Gerações (≥1):</label>
+		<input type="number" id="geracoes" min="1" value="50">
+		<label>Tamanho da População (≥10):</label>
+		<input type="number" id="populacao" min="10" value="30">
+		<button onclick="startTreinamento()">▶️ Iniciar Treinamento</button>
+	</section>
+
+	<section id="vizSection" style="display: none;">
+		<div class="container">
+			<canvas id="matrixCanvas"></canvas>
+			<div id="params"></div>
+		</div>
+
+		<div class="controls">
+			<button onclick="prevMatrix()">⬅️ Anterior</button>
+			<button onclick="nextMatrix()">Próximo ➡️</button>
+			<button onclick="novoTreinamento()">🔄 Novo Treinamento</button>
+		</div>
+
+		<h3>Geração x Fitness</h3>
+		<canvas id="fitnessChartCanvas" width="700" height="250"></canvas>
+	</section>
+
+	<script>
+		const canvas = document.getElementById('matrixCanvas');
+		const ctx = canvas.getContext('2d');
+		const paramDiv = document.getElementById('params');
+		const chartCanvas = document.getElementById('fitnessChartCanvas');
+		const chartCtx = chartCanvas.getContext('2d');
+
+		const pixelSize = 1;
+		let currentIndex = 0;
+		let estados = [];
+
+		function drawMatrix(state) {
+			console.log(state);
+			const matrix = state.matriz;
+			const rows = matrix.length;
+			const cols = matrix[0].length;
+			canvas.width = cols * pixelSize;
+			canvas.height = rows * pixelSize;
+
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			for (let y = 0; y < rows; y++) {
+				for (let x = 0; x < cols; x++) {
+					ctx.fillStyle = matrix[y][x] ? '#000' : '#fff';
+					ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+				}
+			}
+			showParams(state);
+		}
+
+		function showParams(obj) {
+			paramDiv.innerHTML = '';
+			for (const key in obj) {
+				if (key !== 'matriz') {
+					paramDiv.innerHTML += `<strong>${key}</strong>: ${obj[key]}<br>`;
+				}
+			}
+		}
+
+		function prevMatrix() {
+			if (currentIndex > 0) {
+				currentIndex--;
+				drawMatrix(estados[currentIndex]);
+			}
+		}
+
+		function nextMatrix() {
+			if (currentIndex < estados.length - 1) {
+				currentIndex++;
+				drawMatrix(estados[currentIndex]);
+			}
+		}
+
+		function startTreinamento() {
+			const params = {
+				mutacao: parseFloat(document.getElementById('mutacao').value),
+				crossover: parseFloat(document.getElementById('crossover').value),
+				geracoes: parseInt(document.getElementById('geracoes').value),
+				populacao: parseInt(document.getElementById('populacao').value)
+			};
+			estados = [];
+			currentIndex = 0;
+			document.getElementById('configSection').style.display = 'none';
+			document.getElementById('vizSection').style.display = 'block';
+			clearChart();
+			geneticAlgorithm(params, updateState); // função externa
+		}
+
+		function novoTreinamento() {
+			document.getElementById('configSection').style.display = 'block';
+			document.getElementById('vizSection').style.display = 'none';
+		}
+
+		function updateState(obj) {
+			console.log(obj);
+			estados.push(obj);
+			currentIndex = estados.length - 1;
+			drawMatrix(obj);
+			updateChart(obj.geracao, obj.fitnes);
+		}
+
+		let chartData = [];
+		function updateChart(geracao, fitnes) {
+			chartData.push({ x: geracao, y: fitnes });
+
+			const maxX = Math.max(...chartData.map(p => p.x), 1);
+			const maxY = Math.max(...chartData.map(p => p.y), 1);
+
+			chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+			chartCtx.beginPath();
+			chartData.forEach((p, i) => {
+				const x = (p.x / maxX) * chartCanvas.width;
+				const y = chartCanvas.height - (p.y / maxY) * chartCanvas.height;
+				i === 0 ? chartCtx.moveTo(x, y) : chartCtx.lineTo(x, y);
+			});
+			chartCtx.strokeStyle = '#3b82f6';
+			chartCtx.lineWidth = 2;
+			chartCtx.stroke();
+		}
+
+		function clearChart() {
+			chartData = [];
+			chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+		}
+	</script>
+
+	<script src="websocket.js"></script>
 </body>
 
 </html>

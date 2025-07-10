@@ -53,10 +53,11 @@ def fitness_function_no_rotation(elementos):
 		tecido[y:y+mat.shape[0], x:x+mat.shape[1]] += mat
 
 	# penaliza peças que estao fora do tecido
-	outside_right = sum(tecido[:,TECIDO_LARGURA:TECIDO_LARGURA+MAXIMO_LARGURA_ALTURA_PECA])
+	outside_right = tecido[:,TECIDO_LARGURA:TECIDO_LARGURA+MAXIMO_LARGURA_ALTURA_PECA].sum()
 	# outside_bottom = sum(matriz[:, TECIDO_ALTURA:TECIDO_ALTURA+MAXIMO_LARGURA_ALTURA_PECA])
 	# identificar area sobreposta, onde for > 1 somar
-	overlaping = sum(tecido[0:TECIDO_ALTURA, 0:TECIDO_LARGURA] > 1)
+	overlaping = (tecido[0:TECIDO_ALTURA, 0:TECIDO_LARGURA] > 1).sum()
+	blank_bottom = 0
 	# identificar o bottom vazio, contar as linhas que estão vazias de baixo para cima
 	for y in range(TECIDO_ALTURA,0,-1):
 		if sum(tecido[y, 0:TECIDO_LARGURA]) != 0:
