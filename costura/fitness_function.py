@@ -34,30 +34,34 @@ def fitness_function(elementos):
 	"""
 	# cria uma matriz com 0 (numpy) do tamanho do tecido
 	MAXIMO_LARGURA_ALTURA_PECA = 0
+
+	matrizes = [None] * len(elementos)
 	for i in range(len(elementos)):
 		phase = elementos[i][2]
-		peca = pecas[i]
+		matrizes[i] = pecas[i]['matrix']
 		if phase != 0:
-			peca = rotate(peca,phase, reshape=False)
-			pecas[i] = peca
-		MAXIMO_LARGURA_ALTURA_PECA = max(MAXIMO_LARGURA_ALTURA_PECA, peca.shape[0], peca.shape[1])
+			matrizes[i] = rotate(mat,phase, reshape=True)
+		MAXIMO_LARGURA_ALTURA_PECA = max(MAXIMO_LARGURA_ALTURA_PECA,matrizes[i].shape[0],matrizes[i].shape[1])
 		
-	matriz = np.zeros((TECIDO_ALTURA+MAXIMO_LARGURA_ALTURA_PECA,TECIDO_LARGURA+MAXIMO_LARGURA_ALTURA_PECA), dtype=np.int8)
+	tecido = np.zeros((TECIDO_ALTURA+MAXIMO_LARGURA_ALTURA_PECA,TECIDO_LARGURA+MAXIMO_LARGURA_ALTURA_PECA), dtype=np.int8)
+
+	rotation_punish = 0
 	# para cada peça i, soma na matriz a peça deslocada da posicao i
-	for peca, elemento in zip (pecas, elementos):
+	for peca, mat, elemento in zip (pecas,matrizes, elementos):
 		y, x, phase = elemento
-		
+		if peca['direction']:
+			rotation_punish += abs(peca['angle'] - phase)
 		# des[2] é o angulo em graus que a peça foi rotacionada, pode ser de 0 a 360 e de 1 em 1 grau
-		matriz[y:y+peca.shape[0], x:x+peca.shape[1]] += peca
+		tecido[y:y+mat.shape[0], x:x+mat.shape[1]] += mat
 
 	# penaliza peças que estao fora do tecido
-	outside_right = sum(matriz[:,TECIDO_LARGURA:TECIDO_LARGURA+MAXIMO_LARGURA_ALTURA_PECA])
+	outside_right = sum(tecido[:,TECIDO_LARGURA:TECIDO_LARGURA+MAXIMO_LARGURA_ALTURA_PECA])
 	# outside_bottom = sum(matriz[:, TECIDO_ALTURA:TECIDO_ALTURA+MAXIMO_LARGURA_ALTURA_PECA])
 	# identificar area sobreposta, onde for > 1 somar
-	overlaping = sum(matriz[0:TECIDO_ALTURA, 0:TECIDO_LARGURA] > 1)
+	overlaping = sum(tecido[0:TECIDO_ALTURA, 0:TECIDO_LARGURA] > 1)
 	# identificar o bottom vazio, contar as linhas que estão vazias de baixo para cima
 	for y in range(TECIDO_ALTURA,0,-1):
-		if sum(matriz[y, 0:TECIDO_LARGURA]) != 0:
+		if sum(tecido[y, 0:TECIDO_LARGURA]) != 0:
 			break
-		blank_bottom += TECIDO_LARGURA4
-	return blank_bottom - (outside_right + overlaping), matriz
+		blank_bottom += TECIDO_LARGURA
+	return blank_bottom - (outside_right + overlaping+rotation_punish), tecido
