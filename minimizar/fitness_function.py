@@ -1,4 +1,4 @@
-def fitness_function(individual):
+def fitness_function(x):
     """
     Evaluates the fitness of an individual.
     
@@ -8,12 +8,11 @@ def fitness_function(individual):
     Returns:
         float: The fitness score of the individual.
     """
-    # Example fitness function: sum of the individual's genes
-    return Rastrigin(-5.12,5.12, 2)  # Assuming genes are integers or floats
+    return Rastrigin(x,-5.12,5.12, 2)  # Assuming genes are integers or floats
 
 from math import cos, pi
 
-def Rastrigin(x_lsup, x_linf, n):
+def Rastrigin(x, x_linf, x_lsup, n):
     """
     Rastrigin function for optimization.
     
@@ -25,5 +24,17 @@ def Rastrigin(x_lsup, x_linf, n):
     Returns:
         float: The value of the Rastrigin function.
     """
+    
+    x = [xi if x_linf <= xi <= x_lsup else (x_linf if xi < x_linf else x_lsup) for xi in x]  # Clamping values to limits
     A = 10
-    return A * n + sum([(xi**2 - A * cos(2 * pi * xi)) for xi in range(n)])  # Assuming xi are the variables
+    return A * n + sum([(xi**2 - A * cos(2 * pi * xi)) for xi in x])  # Assuming xi are the variables
+
+if __name__ == "__main__":
+    # Example usage
+    x = [0, 0]  # Example individual
+    fitness = fitness_function(x)
+    print(f"Fitness of {x}: {fitness}")
+    
+    # Test Rastrigin function
+    result = Rastrigin(x, -5.12, 5.12, len(x))
+    print(f"Rastrigin function result for {x}: {result}")
