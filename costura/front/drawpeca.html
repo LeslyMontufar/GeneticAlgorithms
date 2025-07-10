@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Editor de Peças Binárias</title>
+	<style>
+		body {
+			margin: 0;
+			font-family: Arial, sans-serif;
+			background: #f0f0f0;
+			color: #333;
+		}
+
+		.container {
+			max-width: 1000px;
+			margin: 0 auto;
+			padding: 20px;
+			background: #fff;
+		}
+
+		h1 {
+			text-align: center;
+			margin-bottom: 10px;
+		}
+
+		.controls {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+			align-items: center;
+			position: sticky;
+			top: 0;
+			background: #fff;
+			z-index: 100;
+			padding: 10px;
+			border-bottom: 1px solid #ccc;
+		}
+
+		.piece-controls {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 10px;
+			align-items: center;
+			margin-bottom: 10px;
+		}
+
+		canvas {
+			border: 1px solid #000;
+			image-rendering: pixelated;
+			cursor: crosshair;
+			margin-bottom: 10px;
+		}
+
+		.tool-btn {
+			padding: 5px 10px;
+			cursor: pointer;
+		}
+
+		.tool-btn.active {
+			background: #007BFF;
+			color: white;
+		}
+
+		.piece {
+			border: 1px solid #ccc;
+			padding: 10px;
+			margin-bottom: 20px;
+			border-radius: 6px;
+			background: #fafafa;
+		}
+
+		pre {
+			background: #eee;
+			padding: 10px;
+			overflow: auto;
+			max-height: 300px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h1>Editor de Peças Binárias</h1>
+
+		<div class="controls">
+			<label>Largura: <input type="number" id="inputWidth" value="32" min="1"></label>
+			<label>Altura: <input type="number" id="inputHeight" value="32" min="1"></label>
+			<label>Pincel: <input type="number" id="brushSize" value="1" min="1"></label>
+			<button id="brushBtn" class="tool-btn active">Lápis</button>
+			<button id="eraserBtn" class="tool-btn">Borracha</button>
+			<button id="mirrorBtn" class="tool-btn">Espelhar: OFF</button>
+			<button id="addPieceBtn">Adicionar Peça</button>
+			<button id="exportBtn">Exportar para Python</button>
+		</div>
+
+		<div id="piecesContainer"></div>
+		<pre id="output"></pre>
+	</div>
+
+	<script>
+		const brushBtn = document.getElementById("brushBtn");
+		const eraserBtn = document.getElementById("eraserBtn");
+		const mirrorBtn = document.getElementById("mirrorBtn");
+		const brushSizeInput = document.getElementById("brushSize");
+		const inputWidth = document.getElementById("inputWidth");
+		const inputHeight = document.getElementById("inputHeight");
+		const piecesContainer = document.getElementById("piecesContainer");
+		const exportBtn = document.getElementById("exportBtn");
+		const output = document.getElementById("output");
+		const addPieceBtn = document.getElementById("addPieceBtn");
+
+		let currentTool = "brush";
+		let mirror = false;
+
+		brushBtn.onclick = () => {
+			currentTool = "brush";
+			brushBtn.classList.add("active");
+			eraserBtn.classList.remove("active");
+		};
+
+		eraserBtn.onclick = () => {
+			currentTool = "eraser";
+			eraserBtn.classList.add("active");
+			brushBtn.classList.remove("active");
+		};
+
+		mirrorBtn.onclick = () => {
+			mirror = !mirror;
+			mirrorBtn.textContent = mirror ? "Espelhar: ON" : "Espelhar: OFF";
+		};
+
+		const pieces = [];
+
+		addPieceBtn.onclick = () => {
+			const last = pieces.at(-1);
+
+			const w = parseInt(inputWidth.value);
+			const h = parseInt(inputHeight.value);
+
+			let copyMatrix = false;
+			let matrix = Array.from({ length: h }, () => Array(w).fill(0));
+
+			if (last) {
+				const lastW = last.data.width;
+				const lastH = last.data.height;
+
+				if (w === lastW && h === lastH) {
+					copyMatrix = true;
+					matrix = last.data.matrix.map(row => [...row]);
+				}
+			}
+
+			const piece = {
+				name: last ? last.dom.querySelector(".nameInput").value : "",
+				angle: last ? parseInt(last.dom.querySelector(".angleInput").value) : 0,
+				direction: last ? last.dom.querySelector(".directionInput").checked : false,
+				width: w,
+				height: h,
+				matrix
+			};
+
+			const pieceDiv = document.createElement("div");
+			pieceDiv.className = "piece";
+
+			pieceDiv.innerHTML = `
+		<div class="piece-controls">
+			<label>Nome: <input type="text" class="nameInput" value="${piece.name}"></label>
+			<label>Ângulo: <input type="number" class="angleInput" value="${piece.angle}"></label>
+			<label>Direção: <input type="checkbox" class="directionInput" ${piece.direction ? "checked" : ""}></label>
+		</div>
+		<canvas width="${w * 15}" height="${h * 15}"></canvas>
+	`;
+
+			const canvas = pieceDiv.querySelector("canvas");
+			const ctx = canvas.getContext("2d");
+
+			piecesContainer.appendChild(pieceDiv);
+			pieces.push({ dom: pieceDiv, data: piece, ctx, canvas });
+
+			draw(piece, ctx);
+
+			let drawing = false;
+
+			canvas.addEventListener("mousedown", (e) => {
+				drawing = true;
+				handleDraw(e);
+			});
+			canvas.addEventListener("mouseup", () => drawing = false);
+			canvas.addEventListener("mouseleave", () => drawing = false);
+			canvas.addEventListener("mousemove", (e) => {
+				if (drawing) handleDraw(e);
+			});
+
+			function handleDraw(e) {
+				const rect = canvas.getBoundingClientRect();
+				const x = Math.floor((e.clientX - rect.left) / 15);
+				const y = Math.floor((e.clientY - rect.top) / 15);
+				const value = currentTool === "brush" ? 1 : 0;
+				const size = Math.floor(parseInt(brushSizeInput.value) / 2);
+
+				for (let dy = -size; dy <= size; dy++) {
+					for (let dx = -size; dx <= size; dx++) {
+						let px = x + dx;
+						let py = y + dy;
+
+						if (px >= 0 && px < piece.width && py >= 0 && py < piece.height) {
+							piece.matrix[py][px] = value;
+
+							if (mirror) {
+								let mirrorX = piece.width - 1 - px;
+								if (mirrorX >= 0 && mirrorX < piece.width) {
+									piece.matrix[py][mirrorX] = value;
+								}
+							}
+						}
+					}
+				}
+				draw(piece, ctx);
+			}
+		};
+
+		function draw(piece, ctx) {
+			for (let y = 0; y < piece.height; y++) {
+				for (let x = 0; x < piece.width; x++) {
+					ctx.fillStyle = piece.matrix[y][x] ? "#000" : "#fff";
+					ctx.fillRect(x * 15, y * 15, 15, 15);
+					ctx.strokeStyle = "#ccc";
+					ctx.strokeRect(x * 15, y * 15, 15, 15);
+				}
+			}
+		}
+
+		exportBtn.onclick = () => {
+			let code = "import numpy as np\n\npecas = []\n\n";
+			for (const p of pieces) {
+				const name = p.dom.querySelector(".nameInput").value || "sem_nome";
+				const angle = parseInt(p.dom.querySelector(".angleInput").value);
+				const direction = p.dom.querySelector(".directionInput").checked;
+				const matrix = p.data.matrix.map(row => "[" + row.join(", ") + "]").join(",\n\t\t");
+
+				code += `pecas.append({'name': '${name}',\n`;
+				code += `\t'angle': ${angle},\n`;
+				code += `\t'direction': ${direction},\n`;
+				code += `\t'matrix': np.array([\n\t\t${matrix}\n\t])\n})\n\n`;
+			}
+			output.textContent = code;
+		};
+	</script>
+</body>
+
+</html>
