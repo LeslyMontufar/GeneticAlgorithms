@@ -1,0 +1,70 @@
+/* styles.css */
+body {
+    background-color: #FFFFF0;
+    /* marfim */
+    font-family: serif;
+    color: #333;
+    padding: 2rem;
+}
+
+form {
+    max-width: 600px;
+    margin: auto;
+    background: #FFFFFF;
+    padding: 1.5rem;
+    border: 1px solid #CCC;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #0B3D91;
+    /* azul alfaiataria */
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #AAA;
+    border-radius: 4px;
+}
+
+.piece {
+    margin-bottom: 1rem;
+}
+
+.piece-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+}
+
+.squares {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.square {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #0B3D91;
+    cursor: pointer;
+    background: #FFF;
+}
+
+.square.active {
+    background: #0B3D91;
+}
+
+button {
+    background: #0B3D91;
+    color: #FFF;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 1rem;
+}

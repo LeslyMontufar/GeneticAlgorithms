@@ -1,0 +1,51 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Site de Costura</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <form id="tetris-form">
+        <label for="name">Nome:</label>
+        <input type="text" id="name" name="name" required>
+        <div class="pieces">
+            <!-- Para cada peça de Tetris: I, O, T, S, Z, J, L -->
+            <div class="piece" data-piece="I">
+                <span class="piece-label">Peça I</span>
+                <div class="squares"></div>
+            </div>
+            <div class="piece" data-piece="O">
+                <span class="piece-label">Peça O</span>
+                <div class="squares"></div>
+            </div>
+            <div class="piece" data-piece="T">
+                <span class="piece-label">Peça T</span>
+                <div class="squares"></div>
+            </div>
+            <div class="piece" data-piece="S">
+                <span class="piece-label">Peça S</span>
+                <div class="squares"></div>
+            </div>
+            <div class="piece" data-piece="Z">
+                <span class="piece-label">Peça Z</span>
+                <div class="squares"></div>
+            </div>
+            <div class="piece" data-piece="J">
+                <span class="piece-label">Peça J</span>
+                <div class="squares"></div>
+            </div>
+            <div class="piece" data-piece="L">
+                <span class="piece-label">Peça L</span>
+                <div class="squares"></div>
+            </div>
+        </div>
+        <button type="submit">Enviar</button>
+    </form>
+    <script src="script.js"></script>
+</body>
+
+</html>
