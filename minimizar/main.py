@@ -1,6 +1,5 @@
 import random
 from fitness_function import *
-import numpy as np
 
 class Individual:
     def __init__(self, genes):
@@ -89,8 +88,8 @@ def calculate(mutation_rate, crossover_rate, generations, population_size, eleme
 
 if __name__ == "__main__":
     # Example usage
-    mutation_rate = 0.01
-    crossover_rate = 0.7
+    mutation_rate = 0.1
+    crossover_rate = 0.9
     generations = 1000
     population_size = 500
     element_count = 2 # x y of the Rastrigin function
