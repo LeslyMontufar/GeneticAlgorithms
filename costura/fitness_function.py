@@ -54,16 +54,19 @@ def fitness_function_no_rotation(elementos):
 
 	# penaliza peças que estao fora do tecido
 	outside_right = tecido[:,TECIDO_LARGURA:TECIDO_LARGURA+MAXIMO_LARGURA_ALTURA_PECA].sum()
+	
+	outside_bottom = tecido[TECIDO_ALTURA:TECIDO_ALTURA+MAXIMO_LARGURA_ALTURA_PECA,:].sum()
 	# outside_bottom = sum(matriz[:, TECIDO_ALTURA:TECIDO_ALTURA+MAXIMO_LARGURA_ALTURA_PECA])
 	# identificar area sobreposta, onde for > 1 somar
 	overlaping = (tecido[0:TECIDO_ALTURA, 0:TECIDO_LARGURA] > 1).sum()
-	blank_bottom = 0
+	max_lines = 0
 	# identificar o bottom vazio, contar as linhas que estão vazias de baixo para cima
-	for y in range(TECIDO_ALTURA,0,-1):
+	for y in range(TECIDO_ALTURA+1,0,-1):
 		if sum(tecido[y, 0:TECIDO_LARGURA]) != 0:
 			break
-		blank_bottom += TECIDO_LARGURA
-	return blank_bottom - (outside_right + overlaping), tecido
+		max_lines += 1
+	blank_bottom =  max_lines
+	return blank_bottom - (outside_right*1000 + overlaping*1000 + outside_bottom*1000), tecido
 
 def fitness_function(elementos):
 	"""
