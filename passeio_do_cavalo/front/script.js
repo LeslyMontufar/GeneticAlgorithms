@@ -104,21 +104,21 @@ function clearMovesList() {
     movesList.innerHTML = '';
 }
 
-function badvisit(currentMoveIndex, moves) {
-    if (currentMoveIndex == 0) {
-        return false;
-    }
-    let { row: rowOld, col: colOld } = getRowColumnFromIndex(moves[currentMoveIndex - 1])
-    let { row, col } = getRowColumnFromIndex(moves[currentMoveIndex])
+// function badvisit(currentMoveIndex, moves) {
+//     if (currentMoveIndex == 0) {
+//         return false;
+//     }
+//     let { row: row_anterior, col: col_anterior } = getRowColumnFromIndex(moves[currentMoveIndex - 1])
+//     let { row, col } = getRowColumnFromIndex(moves[currentMoveIndex])
 
-    if (Math.abs((row - rowOld) * (col - colOld)) == 2) {
-        return false;
-    }
-    return true;
-}
+//     if (Math.abs((row - row_anterior) * (col - col_anterior)) == 2) {
+//         return false;
+//     }
+//     return true;
+// }
 
 function animateKnightMoves(moves) {
-    console.log("Animando: ", JSON.stringify(knightMoves))
+    console.log("Animando: ", JSON.stringify(moves))
     if (animationInProgress) return; // Não iniciar se já estiver em andamento
     animationInProgress = true;
     currentMoveIndex = 0;
@@ -130,22 +130,23 @@ function animateKnightMoves(moves) {
             return;
         }
 
-        let index = moves[currentMoveIndex];
-        let { row, col } = getRowColumnFromIndex(index)
+        // let index = moves[currentMoveIndex];
+        let [row, col] = moves[currentMoveIndex]; // getRowColumnFromIndex(index)
         placeKnight(row, col)
 
-        const cell = board.children[index];
+        const cell = board.children[row* lado + col];
+        cell.classList.add('visited');
 
-        if (badvisit(currentMoveIndex, moves)) {
-            cell.classList.add('bad-visit');
-            justChecking = true;
-        } else if (justChecking) {
-            cell.classList.add('just-checking');
-        }
-        else {
-            // Marca a casa como visitada
-            cell.classList.add('visited');
-        }
+        // if (badvisit(currentMoveIndex, moves)) {
+        //     cell.classList.add('bad-visit');
+        //     justChecking = true;
+        // } else if (justChecking) {
+        //     cell.classList.add('just-checking');
+        // }
+        // else {
+        //     // Marca a casa como visitada
+        //     cell.classList.add('visited');
+        // }
 
         currentMoveIndex++;
         animationTimeouts.push(setTimeout(moveNext, 600)); // tempo entre os movimentos
@@ -179,8 +180,8 @@ async function runGeneticAndAnimate() {
         let pm = document.querySelector('input[name="pm"]').value;
         let pc = document.querySelector('input[name="pc"]').value;
         let pElitism = document.querySelector('input[name="pElitism"]').value;
-        // console.log(epochs, population)
-        knightMoves = geneticAlgorithm({ iterations: epochs, population: population, pm: pm, pc: pc, tournamentSize: 3, pElitism: pElitism, lado: lado, first_pos: knightPosition }, update = update_progress);
+
+        geneticAlgorithm({ iterations: epochs, population: population, pm: pm, pc: pc, tournamentSize: 3, pElitism: pElitism, lado: lado, first_pos: knightPosition }, update = update_progress);
 
         // Prepara para animação
         icon.classList.replace('fa-spinner', 'fa-pause');
@@ -190,7 +191,7 @@ async function runGeneticAndAnimate() {
         clearVisited();
 
         // Executa a animação
-        animateKnightMoves(knightMoves);
+        // animateKnightMoves(knightMoves);
     } catch (error) {
         console.error("Erro:", error);
     }
@@ -220,19 +221,19 @@ function toggleAnimation() {
 }
 
 function update_progress(data) {
-    if(!data.running)
+    console.log(data);
+    if (!data.running) {
+        animateKnightMoves(data.best_individual_genes);
         return;
-	
+    }
+    
     const g = data.generation;
-	const progresso = data.progress;
-	const best_individual = data.best_individual;
+    const progresso = data.progress;
     const barra = document.getElementById("barra-progresso");
     barra.style.width = progresso + "%";
 
-    bestFitnessID.innerHTML = best_individual.fitness;
+    bestFitnessID.innerHTML = data.best_individual.fitness;
     currentGenID.innerHTML = g;
-
-
 }
 
 createBoard(lado);

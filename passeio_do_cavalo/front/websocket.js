@@ -8,13 +8,15 @@ async function geneticAlgorithm(obj, fnc_update_progress) {
 		// backend me enviou algo
 		// transforma a string em objeto
 		const data = JSON.parse(event.data)
-		// verifica se finalizou
-		if (data.finished == true) {
-			global_resolve(data)
-			return;
-		}
+		
 		// precisa atualizar o front
 		fnc_update_progress(data);
+		// verifica se finalizou
+		if (!data.running) {
+			global_resolve(data)
+			ws.close();
+			return;
+		}
 	};
 
 	ws.onerror = (err) => {
